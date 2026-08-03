@@ -1013,3 +1013,386 @@ m10:["**Second derivatives, second moments.** Differentiate again: \\( \\sum n^2
 m12:["**Two payoffs.** (1) *Backtesting densities*: if your forecast distributions are honest, the PIT values \\( F_t(x_t) \\) are iid U(0,1) — histogram them; U-shape = overconfident, hump = underconfident.\n(2) *Copulas*: \\( C(u,v) \\) glues uniform marginals into any dependence — Sklar. Marginals and dependence become separately chosen, separately stressed."]
 
 };
+
+/* =========================================================================
+   PACK: MARKETS & MARKET MAKING (mk) — new category
+   Cards may carry inline `pages:[...]` = extra swipeable pages after the body.
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"mk01",cat:"markets",type:"concept",diff:1,title:"The spread, decomposed",
+body:"A bid–ask spread pays for three things:\n**1.** Order processing (fixed costs, exchange fees).\n**2.** Inventory risk (holding what you just bought while it moves).\n**3.** Adverse selection (some counterparties know more than you).\nEverything in market making is managing components 2 and 3.",
+pages:["**Why a spread exists even with zero costs.** Glosten–Milgrom's point: quotes are *conditional expectations*. The ask must be \\( \\mathbb{E}[V \\mid \\text{someone buys}] \\) — and “someone wants to buy” is itself bad news about V.\nQuoting the unconditional mean gets you picked off from both sides. The spread is the market's price for information asymmetry — swipe on for the two-line model."]},
+
+{id:"mk02",cat:"markets",type:"question",diff:2,title:"Glosten–Milgrom in two lines",
+body:"Asset worth 0 or 1, each with prob 1/2. A fraction \\( \\pi \\) of traders are informed (they know V and trade accordingly); the rest buy or sell at random. What bid and ask do you quote?",
+answer:"**Ask = \\( \\tfrac{1+\\pi}{2} \\), Bid = \\( \\tfrac{1-\\pi}{2} \\), Spread = \\( \\pi \\).**\nAsk \\( = \\mathbb{P}(V=1 \\mid \\text{buy}) \\): buys come from informed (only when V = 1) plus half the noise. Bayes gives \\( \\tfrac{1+\\pi}{2} \\); the bid mirrors it.\n**The spread equals the informed fraction** — adverse selection made quantitative.",
+pages:["**The Bayes step, written out.** \\( \\mathbb{P}(\\text{buy}\\mid V{=}1) = \\pi + \\tfrac{1-\\pi}{2} \\), \\( \\mathbb{P}(\\text{buy}\\mid V{=}0) = \\tfrac{1-\\pi}{2} \\).\n\\[ \\text{ask} = \\frac{\\tfrac12\\big(\\pi + \\tfrac{1-\\pi}{2}\\big)}{\\tfrac12\\big(\\pi + \\tfrac{1-\\pi}{2}\\big) + \\tfrac12\\cdot\\tfrac{1-\\pi}{2}} = \\frac{1+\\pi}{2}. \\]\nAfter each trade you update the prior and re-quote — quotes are a Bayesian filter running on order flow. Prices “discover” information because market makers are forced to learn."]},
+
+{id:"mk03",cat:"markets",type:"question",diff:2,title:"Make me a market",
+body:"Interviewer: “Make me a market on the weight of a fully loaded 747, in tonnes.” What do you actually say, and what are they grading?",
+answer:"Say a **two-sided quote with a width that matches your uncertainty**: e.g. “320 bid, at 420” around a Fermi mid.\nThey grade: (1) a sane mid via decomposition, (2) width ∝ your real uncertainty — not bravado, not cowardice, (3) how you **update** when they trade with you.",
+pages:["**Building the mid.** Empty 747 ≈ 180 t; max takeoff ≈ 400 t; “fully loaded” → near the top: mid ≈ 350–380 t. Say the decomposition out loud — the number matters less than the audit trail.",
+"**The dynamics they always test.** They lift your offer. Now what? **Move your market up** — their trade is information (they may know the answer). If you re-quote the same market, you have learned nothing and they will hit you again, all day.\nGolden rule: every fill shifts your mid in the direction of the trade; size of the shift ∝ how informed you think they are. That is mk02 in real time."]},
+
+{id:"mk04",cat:"markets",type:"concept",diff:2,title:"Inventory: skew your quotes",
+body:"After buying, you are long and exposed — so **lower both your bid and your ask**: you buy less eagerly, you sell more eagerly. Quote around a *reservation price* shifted against your inventory, with width ∝ volatility.",
+pages:["**Avellaneda–Stoikov in one line.** Reservation price for inventory q:\n\\[ r = \\text{mid} - q\\,\\gamma\\sigma^2(T-t), \\]\nwith risk aversion γ. Optimal half-spread ≈ \\( \\tfrac{\\gamma\\sigma^2(T-t)}{2} + \\tfrac{1}{\\gamma}\\ln(1+\\tfrac{\\gamma}{k}) \\) where k is the arrival-rate decay.\nRead it, do not memorize it: **shift ∝ inventory × variance × horizon**; width ∝ vol and how patient the flow lets you be."]},
+
+{id:"mk05",cat:"markets",type:"concept",diff:2,title:"Market impact: the square-root law",
+body:"Executing a metaorder of size Q against daily volume V costs roughly\n\\[ \\Delta P \\approx Y\\,\\sigma\\sqrt{\\tfrac{Q}{V}}, \\quad Y \\approx 0.5\\text{–}1. \\]\nConcave: the **second** million moves the price less than the first. Empirically one of the most robust facts in markets.",
+pages:["**Temporary vs permanent.** Temporary impact (you pay it, it decays) vs permanent (information leaked into the price). Almgren–Chriss models temporary as \\( \\eta v \\) (linear in trading rate) and permanent as \\( \\gamma Q \\).\nOptimal execution then trades **impact cost vs timing risk**: \\( \\min\\ \\mathbb{E}[\\text{cost}] + \\lambda\\operatorname{Var} \\) → sinh-shaped schedules, front-loaded when you are risk-averse. You have implemented this — in an interview, sketch the frontier: cost on one axis, variance on the other."]},
+
+{id:"mk06",cat:"markets",type:"concept",diff:3,title:"Kyle's λ",
+body:"In Kyle's one-shot model, price moves **linearly** in net order flow: \\( \\Delta P = \\lambda\\,q \\).\n\\( 1/\\lambda \\) is market **depth**: how much flow it takes to move price by 1. The insider trades proportionally to their edge — and hides inside the noise traders' volume.",
+pages:["**The closed form.** With value \\( V \\sim \\mathcal{N}(0,\\sigma_v^2) \\) and noise flow \\( u \\sim \\mathcal{N}(0,\\sigma_u^2) \\):\n\\[ \\lambda = \\frac{\\sigma_v}{2\\sigma_u}. \\]\nDepth = noise/signal: more camouflage (σ_u ↑) → deeper market; more private information (σ_v ↑) → shallower. The insider's expected profit is \\( \\tfrac{\\sigma_v\\sigma_u}{2} \\) — they *monetize the camouflage*. Exactly half the information ends up in the price."]},
+
+{id:"mk07",cat:"markets",type:"concept",diff:2,title:"The limit order book",
+body:"Price–time priority: better price first, then earlier arrival. Market order = pay the spread for certainty now; limit order = earn the spread, maybe, later.\nEvery execution question is a position on that trade-off.",
+pages:["**Queue position has a price.** Joining a 500-lot queue at the best bid: you get filled either (a) by a harmless seller — fine, or (b) right before the price ticks down through you — you bought the top. Long queues fill you *selectively in the bad state*: adverse selection again, inside the book.\nThis is why queue priority (being early) is worth real money, and why HFTs fight for it."]},
+
+{id:"mk08",cat:"markets",type:"question",diff:2,title:"The 80% interval game",
+body:"Give an 80% confidence interval for: the length of the Nile, Apple's annual revenue, the number of piano tuners in London. Most candidates get well under half inside. Why, and what is the fix?",
+answer:"**Overconfidence** — intervals people feel good about are ~40–50% intervals.\nFix: widen until it genuinely hurts, think in **orders of magnitude** (log scale), and anchor both ends independently (“what would surprise me low? high?”).\nTrading firms score this like risk: an interval that is too narrow is a blow-up.",
+pages:["**Calibration as a trading skill.** A market maker's width *is* an 80–95% interval, priced. Systematically narrow intervals = systematically picked off; systematically wide = no flow.\nPractice loop: guess → interval → check → log your hit rate. Ten minutes a day for two weeks moves most people from 45% to near 80. This is trainable, and firms know it."]},
+
+{id:"mk09",cat:"markets",type:"concept",diff:2,title:"Carry, basis, roll",
+body:"Futures basis = financing − yield: \\( F - S = S(r - d)\\tau \\) (+ storage for commodities). **Contango**: F above S; **backwardation**: below.\nRoll yield: holding futures in contango bleeds as contracts converge to spot; in backwardation it pays.",
+pages:["**Worked cash-and-carry.** Index at 5000, r = 4%, dividend yield 2%, 6 months: fair \\( F = 5000\\,(1 + 0.02\\times0.5) = 5050 \\).\nScreen shows 5080? Sell the future, buy the basket, finance it: lock 30 points minus costs. The trade *is* the pricing formula — say it as a trade and the interviewer hears a trader."]},
+
+{id:"mk10",cat:"markets",type:"concept",diff:2,title:"Momentum vs mean reversion",
+body:"Same market, opposite signs by horizon: microstructure mean reversion (minutes), **momentum** (weeks–12 months), long-horizon reversal (3–5 years).\nAutocorrelation is not one number — it is a function of the lag.",
+pages:["**How you would test it.** Variance ratios: \\( VR(q) = \\tfrac{\\operatorname{Var}(r_{q})}{q\\,\\operatorname{Var}(r_1)} \\) above 1 → momentum at that horizon; below → reversion. Plot VR against q and the regime structure appears.\nWhy both persist: momentum earns a risk/behavioral premium but crashes (2009); short-horizon reversion is capacity-constrained and cost-heavy. Every anomaly answer should end with “…and here is why it is not free money.”"]},
+
+{id:"mk11",cat:"markets",type:"question",diff:2,title:"Dice market, live update",
+body:"You quote a market on the sum of two dice. I roll them secretly, peek at one die, and tell you: “this one is a 6.” Re-quote.",
+answer:"Fair value jumps from 7 to \\( 6 + 3.5 = \\mathbf{9.5} \\); quote around 9.5 (say 9 at 10).\nThe tested skill is **repricing on partial information instantly** — conditional expectation as a reflex, then width for the remaining uncertainty (one die: variance 35/12, σ ≈ 1.7).",
+pages:["**Variants they escalate to.** “The **max** is 6” (equivalently: at least one die shows 6): 11 equally likely pairs, total sum 102, so \\( \\mathbb{E}[\\text{sum}] = \\tfrac{102}{11} \\approx 9.27 \\).\nNotice it is *below* 9.5: “this specific die is a 6” ≠ “some die is a 6” — the second conditions on a bigger, less favorable set. The Tuesday-boy trap, wearing a trading costume. Re-quote 9 at 9.5 and explain why: that explanation is the hire."]},
+
+{id:"mk12",cat:"markets",type:"question",diff:3,title:"The red–black stopping game",
+body:"A 52-card deck, shuffled. Cards are revealed one by one; you may stop at any moment. Payoff = (reds seen) − (blacks seen). You may also stop before the first card. What is this game worth, and what is the idea?",
+answer:"**≈ 2.62** (exact by dynamic programming).\nStop value in state (r, b remaining) is \\( b - r \\); continue value averages the two draws:\n\\[ V(r,b) = \\max\\Big(b-r,\\ \\tfrac{r}{r+b}V(r{-}1,b) + \\tfrac{b}{r+b}V(r,b{-}1)\\Big). \\]\nNever negative (you can always stop at 0) — the **option to quit** has strictly positive value in a fair game.",
+pages:["**The structure of the optimal rule.** You continue when behind (nothing to lose — you can always ride back to 0 in expectation) and stop when sufficiently ahead relative to cards left: a threshold ≈ proportional to \\( \\sqrt{\\text{remaining}} \\).\nThis is a minimal model of **when to take profit** on a mean-zero book, and a perfect whiteboard exercise: set up the DP, argue V ≥ 0, compute small cases (V(1,1) = 1/2)."]},
+
+{id:"mk13",cat:"markets",type:"concept",diff:2,title:"PnL attribution",
+body:"Decompose every day's PnL: **direction** (delta × move) + **carry** + **vol/gamma** + **slippage/fees** + residual.\nA persistent unexplained residual is a broken risk model or a hidden position — either way, the first thing to chase.",
+pages:["**“How do you know your edge is real?”** The answer they want: a t-stat on daily PnL (\\( \\text{Sharpe}\\times\\sqrt{\\text{years}\\cdot 252}/\\sqrt{252} \\)… practically: \\( t \\approx \\text{Sharpe}\\times\\sqrt{\\text{years}} \\)), **stable attribution** (the money comes from where the thesis says), out-of-sample persistence, and capacity honesty.\nSharpe 2 for one year: t ≈ 2 — barely. Sharpe 2 for four years: t ≈ 4. Time, not brilliance, is what proves edges."]},
+
+{id:"mk14",cat:"markets",type:"concept",diff:2,title:"Edge vs cost: the first filter",
+body:"A strategy lives iff **edge per trade > cost per trade**. Costs = spread/2 + fees + impact. High-turnover ideas need per-trade edges that survive that bar; most do not.\nSharpe, capacity, turnover: pick two.",
+pages:["**Numbers to carry.** Liquid equity round-trip: ~1–3 bps spread cost + impact \\( \\propto \\sigma\\sqrt{Q/V} \\). A signal worth 2 bps per trade with 3 bps of cost is a **losing** strategy with a beautiful backtest (gross).\nInterview move: whenever you propose a strategy, unprompted, state its turnover and the cost bar it must clear. Instant seniority."]},
+
+{id:"mk15",cat:"markets",type:"question",diff:2,title:"A free arbitrage on screen",
+body:"You spot a locked/crossed market or a “riskless” price gap between venues. Before you send the order — what is your checklist?",
+answer:"Stale quote? Fees, borrow, taxes? Can you actually get **both legs** (size, latency, settlement)? Currency/dividend/corporate-action mismatch? And the meta-question: **who is the loser in this trade, and why are they there?**\nIf you cannot name the sucker at the table…",
+pages:["**Limits to arbitrage, the grown-up version.** Real “arbs” die by: execution risk (one leg fills), funding risk (margin calls before convergence — LTCM), short constraints, and crowding (everyone sees it, exit is the risk).\n“Prices can stay wrong longer than you can stay funded” is the sentence to deploy."]},
+
+{id:"mk16",cat:"markets",type:"concept",diff:2,title:"Auctions & the shading reflex",
+body:"Second-price (Vickrey): bid your true value — dominant strategy. First-price: **shade below** value (you pay your bid). Common-value auctions add the winner's curse: winning means you were the most optimistic — shade more as bidders multiply.",
+pages:["**Where it shows up.** Opening/closing auctions, treasury auctions, IPO allocations, ad exchanges — and every “I'll quote you a price” negotiation.\nUniform value on [0,1], n bidders, first-price equilibrium bid: \\( \\tfrac{n-1}{n}v \\) — shading shrinks as competition grows, but the winner's curse correction grows. Two forces, opposite signs: say both and you have said everything."]},
+
+{id:"mk17",cat:"markets",type:"concept",diff:3,title:"Toxic flow & who pays for order flow",
+body:"Flow is **toxic** when it predicts short-term price moves (informed or fast). Makers segment counterparties: benign retail flow gets tighter prices — that is the entire economics of payment for order flow.\nSpread to *you* is a statement about what the maker thinks *you* know.",
+pages:["**Measuring toxicity.** Markouts: average mid move at +1s, +10s, +5min after your fills. Consistently negative markouts on your quotes = you are the sucker.\nThe defense loop: widen or fade to toxic tags, tighten to benign — which is mk02's π, estimated live per counterparty/channel."]},
+
+{id:"mk18",cat:"markets",type:"question",diff:3,title:"Kelly meets estimation error",
+body:"Your backtest says the edge is p = 0.55 on even-money bets, so Kelly says bet 10%. Why should you bet less, and roughly how much less?",
+answer:"Because **p is an estimate**. Overbetting is punished more than underbetting (growth is concave, zero at 2× Kelly), so uncertainty pushes you down.\nWith a noisy edge, the growth-optimal fraction shrinks by roughly \\( \\tfrac{\\text{signal}}{\\text{signal}+\\text{noise}} \\) — a James–Stein-flavored haircut. Practitioners: **half-Kelly or less**, always.",
+pages:["**Why the asymmetry.** \\( g(f) \\approx f\\mu - \\tfrac12 f^2\\sigma^2 \\): a parabola. Betting 0.5× Kelly costs 25% of growth; betting 1.5× costs 25% too — but 2× costs **all of it** and beyond is negative.\nAdd correlated bets (your 20 signals are not 20 bets), fat tails, and drawdown constraints: every real consideration points the same direction. Down."]},
+
+{id:"mk19",cat:"markets",type:"concept",diff:1,title:"The prop-shop interview meta",
+body:"Optiver/SIG/JS-style loops test four muscles: **mental arithmetic under time**, **calibrated markets** (mk03, mk08), **probability under pressure**, and **game theory instincts**.\nEach is trainable; none is IQ. Ten focused minutes a day per muscle beats a weekend cram.",
+pages:["**Practice mapping inside this app.** Mental Math cards + a timer → muscle 1. “Make me a market” + interval game → muscle 2. The Daily Ten session → muscle 3 under a clock. Auctions, Penney, pirates → muscle 4.\nIn the room: narrate, quantify, update out loud. They are hiring a *process*, not answers."]}
+
+]);
+
+/* =========================================================================
+   PACK: HARD BRAINTEASERS, WAVE 2 (b27+) — boss cards use pages as hints
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"b27",cat:"brainteaser",type:"question",diff:3,title:"Boss · Twenty questions with one lie",
+body:"I think of a number in 1…1,000,000. You ask yes/no questions; I may **lie at most once**. Without lies you would need 20 questions. How many do you need now?\n*(Swipe → for a hint before revealing.)*",
+answer:"**25.**\nEach answer string must decode to (number, lie position or “no lie”): you must distinguish \\( 10^6\\times(q+1) \\) scenarios with \\( 2^q \\) strings.\n\\( 2^{25} = 33.5\\text{M} \\ge 26\\text{M} \\) ✓ while \\( 2^{24} = 16.8\\text{M} < 25\\text{M} \\) ✗. Achievability: Berlekamp's error-correcting strategy — this is coding theory (a 1-error-correcting code) wearing a puzzle mask.",
+pages:["**Hint.** Count what an answer transcript must encode. It is not just the number: the transcript must also reveal *whether and where* I lied — otherwise you could not trust the decoding. How many total (number, lie) scenarios are there, and how many transcripts of length q exist?"]},
+
+{id:"b28",cat:"brainteaser",type:"question",diff:2,title:"Blindfolded coins",
+body:"100 coins on a table, exactly 10 showing heads. You are blindfolded, gloved (can't feel faces), but may flip any coins. Split them into two groups with **equally many heads**.",
+answer:"Take **any 10 coins** aside and **flip all 10**.\nIf the set-aside pile held k heads, the big pile keeps 10 − k heads — and after flipping, your pile shows 10 − k heads as well. Equal, always, whatever k was.\nThe move: engineer an identity that holds for *unknown* k, instead of trying to learn k.",
+pages:["**Why it works, slowly.** Set aside 10 coins containing k heads (k unknown). Remaining pile: 10 − k heads. Your pile after flipping: its k heads became tails, its 10 − k tails became heads → **10 − k heads**. Both piles: 10 − k. ∎\nGeneral pattern: with h heads total, set aside h coins and flip them all. Invariants beat information."]},
+
+{id:"b29",cat:"brainteaser",type:"question",diff:3,title:"Chameleons",
+body:"An island holds 13 red, 15 green, 17 blue chameleons. When two of different colors meet, both turn the third color. Can they all end up the same color?",
+answer:"**No.**\nInvariant: the pairwise differences of counts **mod 3** never change (a meeting sends counts \\( (a,b,c) \\to (a{-}1, b{-}1, c{+}2) \\): every difference shifts by 0 or 3).\nAll-same-color needs two counts equal, i.e. some difference ≡ 0 (mod 3). Here the differences are 2, 2, 4 ≡ 2, 2, 1 — never zero. Impossible.",
+pages:["**How to find such invariants.** Compute the move's effect on small algebraic probes: sums (here total is conserved — useless), differences mod small numbers, parities, weighted sums.\nThe skill being tested is *proposing candidate invariants fast*, not divine inspiration. Say your probes out loud as you try them."]},
+
+{id:"b30",cat:"brainteaser",type:"question",diff:3,title:"Boss · Camel and bananas",
+body:"3000 bananas, a market 1000 km away, a camel that carries ≤ 1000 bananas and eats 1 banana per km walked (any direction). Maximize bananas delivered.\n*(Swipe → for the key idea.)*",
+answer:"**533 bananas** (533⅓).\nPhase 1 (3 loads → 5 crossings/km, cost 5/km) until 2000 remain: 200 km. Phase 2 (2 loads → 3/km) until 1000 remain: 333⅓ km. Phase 3: one load straight through the remaining 466⅔ km: arrive with \\( 1000 - 466\\tfrac23 = 533\\tfrac13 \\).",
+pages:["**Hint.** With more than one camel-load, moving the *whole stock* forward 1 km costs more than 1 banana — how much exactly, as a function of the number of loads? Then notice the cost rate drops at exactly two thresholds. Choose the phase boundaries so each phase ends precisely when a load is consumed.",
+"**The general principle.** Cost per km = \\( 2\\lceil \\text{loads}\\rceil - 1 \\) (each extra load forces a round trip). Jeep-problem cousin: max reachable distance with n loads = \\( 1000\\,(1 + \\tfrac13 + \\tfrac15 + \\cdots + \\tfrac{1}{2n-1}) \\) — harmonic-odd growth, so range grows *logarithmically* in fuel. Diminishing returns, quantified."]},
+
+{id:"b31",cat:"brainteaser",type:"question",diff:2,title:"Nim & losing positions",
+body:"Piles of 3, 5, 7 stones; players alternate removing any number from one pile; last stone wins. Who wins, and what is the universal rule?",
+answer:"**First player wins.** Rule: a position is losing iff the **XOR of pile sizes is 0**.\n3⊕5⊕7 = 1 ≠ 0 → winning; the move is to make XOR zero (e.g. 3,5,7 → 2,5,7: 2⊕5⊕7 = 0).\n21-flags variant (take 1–3, one pile): losing positions are multiples of 4 — same theory, base 4.",
+pages:["**Why XOR.** From a zero-XOR position, any move breaks the balance (you changed one pile's bits); from nonzero, you can always rebalance: target the pile containing the top set bit of the XOR.\nSo zero-XOR positions form a closed trap: opponent leaves, you return. Sprague–Grundy generalizes this to *all* impartial games — every such game is secretly Nim."]},
+
+{id:"b32",cat:"brainteaser",type:"question",diff:3,title:"Max of n Gaussians",
+body:"Roughly how big is the largest of n independent standard normals?",
+answer:"Scale: \\( \\sqrt{2\\ln n} \\).\nHeuristic: the tail \\( \\mathbb{P}(Z > x) \\approx e^{-x^2/2} \\)-ish; the max sits where \\( n\\,\\mathbb{P}(Z > x) \\approx 1 \\Rightarrow x \\approx \\sqrt{2\\ln n} \\).\nActual means run below the asymptote: n = 10: **1.54**, n = 100: **2.51**, n = 1000: **3.24** (vs 2.15 / 3.03 / 3.72) — the convergence is famously slow.",
+pages:["**Why you care in finance.** Best of n backtested strategies ≈ max of n noisy Sharpes: even with **zero true edge**, the winner shows \\( \\approx \\sqrt{2\\ln n}\\times \\) its standard error. Test 100 signals → expect a ~2.5σ champion by luck alone.\nThis is the selection-bias haircut in one formula — quote it when asked “why do backtests decay live?”"]},
+
+{id:"b33",cat:"brainteaser",type:"question",diff:2,title:"The coin rotation paradox",
+body:"A coin rolls without slipping once around an identical, fixed coin. How many full rotations does it make?",
+answer:"**Two**, not one.\nOne rotation from the path length (equal circumferences) **plus one** from the revolution around the center — the orbit itself turns the coin.\nSame reason a year has 366.25 *sidereal* days but 365.25 solar ones: one turn is eaten by the orbit.",
+pages:["**The clean argument.** Track the coin's center: it traces a circle of radius 2r, length 4πr. Rolling without slipping, rotation = distance/circumference = \\( 4\\pi r / 2\\pi r = 2 \\).\nMoral: choose the right point to track (the center, not the contact point) and paradoxes evaporate."]},
+
+{id:"b34",cat:"brainteaser",type:"question",diff:2,title:"Gas stations on a circle",
+body:"Stations around a circular track hold fuel that **in total** exactly suffices for one lap. Show a starting station always exists from which you can complete the lap (tank starts empty).",
+answer:"Plot cumulative (fuel picked up − fuel burned) along the lap from anywhere: it ends at 0. **Start just after the minimum** of that curve — every later point sits above the minimum, so the tank never goes negative.\nExistence by looking at an extremum: no search, no induction.",
+pages:["**The pattern behind it.** “Shift the start to the argmin of the cumulative sum” is the same move as Kadane's algorithm, the cycle lemma (ballot problem!), and LeetCode's Gas Station.\nOne idea, four famous costumes — worth saying explicitly in an interview to show you see structure, not problems."]},
+
+{id:"b35",cat:"brainteaser",type:"question",diff:1,title:"Breaking chocolate",
+body:"An m × n chocolate bar. Minimum number of breaks (one piece at a time, along lines) to get all mn unit squares?",
+answer:"Always exactly **mn − 1** — no strategy does better *or worse*.\nEvery break increases the piece count by exactly 1; you go from 1 piece to mn pieces. Done.\nThe interview lesson: hunt for a quantity each move changes deterministically before optimizing anything.",
+pages:["**Cousins of the argument.** Handshakes at a tournament (n−1 games to find a winner: each game eliminates exactly one player), counting edges in trees (n nodes ⇒ n−1 edges), and “n−1 merges to combine n files”.\nMonovariant counting kills a whole genre of “what's the minimum number of…” questions in one line."]},
+
+{id:"b36",cat:"brainteaser",type:"fact",diff:3,title:"Infinitely many hats & the axiom of choice",
+body:"Countably many prisoners in a line, random hats, each sees everyone ahead, **no communication**. Astonishingly there is a strategy where all but finitely many guess correctly.\nDefine sequences equivalent if they differ in finitely many places; pre-agree (via the axiom of choice) on one representative per class; everyone answers according to the representative of the class they observe.",
+pages:["**Why it feels illegal.** Each guess is individually a fair coin flip against an independent hat — yet only finitely many fail: the errors are exactly the finitely many places where truth differs from the chosen representative.\nThe strategy is non-constructive and non-measurable — a reminder that “probability” quietly assumes measurability, and AC lives right at that boundary. Fun to deploy; label it as a curiosity, not a technique."]},
+
+{id:"b37",cat:"brainteaser",type:"question",diff:3,title:"Ant on a rubber band",
+body:"An ant walks at 1 cm/s along a 1 km rubber band whose far end is pulled away at 1 km/s (uniform stretch). Does it ever arrive?",
+answer:"**Yes** — stretching also carries the ant forward, so track the *fraction* covered: it gains \\( \\tfrac{v}{L_0 + rt} \\) per second, and \\( \\int \\tfrac{dt}{L_0+rt} \\) **diverges** (harmonically).\nArrival time: \\( t = \\tfrac{L_0}{r}\\big(e^{r/v} - 1\\big) \\approx e^{100{,}000} \\) seconds. Finite. Cosmically, absurdly finite.",
+pages:["**The two-line integral.** Fraction f satisfies \\( f'(t) = \\tfrac{v}{L_0 + rt} \\Rightarrow f(t) = \\tfrac{v}{r}\\ln\\big(1 + \\tfrac{rt}{L_0}\\big) \\); set f = 1.\nSame mathematics as light from distant galaxies crossing expanding space — and a vivid mnemonic for “the harmonic series diverges, slowly.”"]},
+
+{id:"b38",cat:"brainteaser",type:"question",diff:1,title:"Two equal handshakers",
+body:"At any party of n ≥ 2 people, show two people shook the same number of hands.",
+answer:"Handshake counts live in {0, …, n−1} — that is n possible values for n people. But **0 and n−1 cannot coexist** (someone who shook everyone's hand contradicts someone who shook none). So only n−1 values are truly available: pigeonhole.\nA five-second proof once you see the forbidden pair.",
+pages:["**Pigeonhole, weaponized.** The pattern: shrink the codomain by one via a structural incompatibility, then count. Same skeleton: among any n+1 integers from 1..2n, two are coprime (adjacent ones); any 5 points in a unit square, two within \\( \\tfrac{\\sqrt2}{2} \\).\nWhen a puzzle says “show two of them…”, try pigeonhole before anything clever."]},
+
+{id:"b39",cat:"brainteaser",type:"question",diff:3,title:"Boss · The five-card trick",
+body:"Your partner leaves the room. A spectator hands you **5 arbitrary cards** from a deck. You hand back one card to the spectator (hidden) and arrange the other **4 in a row**. Your partner returns, looks at the row, and names the hidden card. How?\n*(Swipe → for hints.)*",
+answer:"**Pigeonhole + cyclic distance + factorial encoding.**\nTwo of the 5 share a suit. Hide one of that pair, chosen so it sits ≤ 6 steps clockwise from its partner on the 13-cycle (A,2,…,K). Place the partner card **first** — it announces the suit and the base rank. The remaining 3 cards have 3! = 6 orderings: encode the distance 1–6. Partner reads: suit, base, +distance.",
+pages:["**Hint 1.** With 5 cards and 4 suits, what does pigeonhole guarantee? And on a cycle of 13 ranks, how far apart can two cards of the same suit be — going the *shorter* way?",
+"**Hint 2.** You control which of the pair is hidden and the order of three unrelated cards. How many messages can 3 ordered cards send? Is that enough for the distance you need?",
+"**Why it is tight.** Information check: 4 ordered cards from 52 can encode \\( 52\\cdot51\\cdot50\\cdot49 \\) messages ≫ 48 possibilities — plenty. The elegant part is doing it with a *human-computable* code. (Fitch Cheney, 1950 — the extended version handles even larger decks.)"]},
+
+{id:"b40",cat:"brainteaser",type:"question",diff:3,title:"Boss · Guess the polynomial",
+body:"I hold a polynomial P with **nonnegative integer** coefficients, unknown degree. You may ask for P evaluated at points of your choice. How many evaluations do you need to determine P exactly?\n*(Swipe → for the hint.)*",
+answer:"**Two.**\nAsk \\( P(1) = S \\) (the sum of coefficients). Then ask \\( P(S+1) \\) and write the answer **in base S + 1**: since every coefficient is ≤ S < S+1, the digits *are* the coefficients, in order.\n(Edge case: S = 0 means P ≡ 0 — one question sufficed.)",
+pages:["**Hint.** Nonnegative integers are the whole game: if you knew an upper bound B on all coefficients, evaluating at any base > B would make the coefficients readable as digits. Can one clever first question manufacture such a bound?",
+"**Why one evaluation cannot suffice.** A single value P(a) is one integer; infinitely many nonneg-integer polynomials share it (e.g. \\( P(2) = 4 \\): \\( x^2 \\), \\( 2x \\), \\( x+2 \\), 4). The base trick is optimal — and a lovely showcase of “choose your query adaptively”."]},
+
+{id:"b41",cat:"brainteaser",type:"question",diff:2,title:"Coins on a round table",
+body:"Two players alternately place identical coins flat on a round table; coins cannot overlap; first player unable to move loses. Who wins?",
+answer:"**Player 1**: place the first coin dead **center**, then mirror every opponent move through the center.\nThe center is the unique self-symmetric spot; after it is taken, symmetry guarantees you always have the mirrored reply. Strategy stealing via geometry.",
+pages:["**The symmetry-strategy family.** Mirroring wins: Nim-like games with paired moves, the “double chess move” argument, tic-tac-toe-ish first-move advantages.\nWhen a game board has an involution (mirror, rotation by π), ask: can one player seize the fixed point and copy? If yes, the analysis is over before it starts."]}
+
+]);
+
+/* =========================================================================
+   PACK: ML · GAUSSIAN PROCESSES · BAYESIAN OPTIMIZATION (ml)
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"ml01",cat:"mlai",type:"concept",diff:2,title:"Gaussian processes",
+body:"A GP is a **prior over functions**: any finite set of function values is jointly Gaussian, with mean m(x) and covariance k(x, x′).\nThe kernel *is* the modeling: it encodes smoothness, lengthscales, periodicity. Everything else is linear algebra.",
+pages:["**The posterior, in full.** Data (X, y), noise σ²:\n\\[ \\mu_*(x) = k_*^\\top (K + \\sigma^2 I)^{-1} y, \\qquad \\sigma_*^2(x) = k(x,x) - k_*^\\top (K + \\sigma^2 I)^{-1} k_*. \\]\nMean = a weighted combination of observed y's; variance = prior minus what the data explains — it **shrinks near data, reverts to prior far away**. Cost: \\( O(n^3) \\) for the solve, \\( O(n^2) \\) per prediction.",
+"**Two facts interviewers probe.** (1) The posterior mean is also the kernel-ridge-regression solution — GPs and RKHS methods are the same object with/without uncertainty. (2) The predictive variance does **not** depend on y (for a fixed kernel) — only on where you sampled. Design of experiments falls out for free."]},
+
+{id:"ml02",cat:"mlai",type:"concept",diff:2,title:"Kernels & lengthscales",
+body:"RBF: \\( k(x,x') = \\sigma_f^2 \\exp\\big(-\\tfrac{\\|x-x'\\|^2}{2\\ell^2}\\big) \\) — infinitely smooth; ℓ sets how far information travels.\n**Matérn** (ν = 5/2, 3/2): rougher, usually more honest for physical/financial data. Small ℓ = wiggly + fast-reverting uncertainty; large ℓ = nearly linear.",
+pages:["**ARD & sparsity in high-D.** Automatic Relevance Determination: one lengthscale per input dimension — huge \\( \\ell_i \\) means feature i is irrelevant.\nSAAS priors push this further: heavy-tailed (half-Cauchy) priors on inverse lengthscales make *most* dimensions switch off a priori — the model bets on **low effective dimensionality**, which is why it survives in 100-D BO where a vanilla GP's uncertainty goes vacuous. (Your Tübingen bread and butter — now say it in one breath.)"]},
+
+{id:"ml03",cat:"mlai",type:"concept",diff:3,title:"Marginal likelihood: Occam built in",
+body:"\\[ \\log p(y \\mid X, \\theta) = -\\tfrac12 y^\\top K_\\sigma^{-1} y \\;-\\; \\tfrac12 \\log|K_\\sigma| \\;-\\; \\tfrac n2 \\log 2\\pi. \\]\nTerm 1: data fit. Term 2: **complexity penalty** — flexible kernels have big determinants. Maximizing it tunes hyperparameters with an automatic Occam's razor, no validation set needed.",
+pages:["**Failure modes worth naming.** The ML surface is multimodal: a tiny-ℓ “interpolate everything” mode and a large-ℓ “it's all noise” mode often coexist — restarts matter. And with n small, the razor can be overconfident.\nInterview one-liner: “type-II maximum likelihood = model selection by integration, and its pathologies are priors' revenge.”"]},
+
+{id:"ml04",cat:"mlai",type:"concept",diff:1,title:"Bayesian optimization, the loop",
+body:"Expensive black-box f: **surrogate** (usually a GP) + **acquisition function** that scores where to evaluate next by balancing exploitation (high μ) and exploration (high σ). Evaluate, update, repeat.\nBO wins when evaluations are costly, the domain is modest-dimensional, and gradients are unavailable.",
+pages:["**When BO loses.** Cheap evaluations (just random-search harder), very high dimensions without structure (uncertainty becomes uniform — unless SAAS/TuRBO-style assumptions), combinatorial spaces without a kernel, heavy noise without replication.\nSaying where your favorite method *fails* is the fastest credibility win in a research interview."]},
+
+{id:"ml05",cat:"mlai",type:"question",diff:3,title:"Derive Expected Improvement",
+body:"Maximizing f, incumbent best \\( f^* \\), posterior \\( f(x) \\sim \\mathcal{N}(\\mu, \\sigma^2) \\). Derive \\( \\mathrm{EI}(x) = \\mathbb{E}[(f(x) - f^*)^+] \\) in closed form.",
+answer:"With \\( z = \\tfrac{\\mu - f^*}{\\sigma} \\):\n\\[ \\mathrm{EI} = (\\mu - f^*)\\,\\Phi(z) + \\sigma\\,\\varphi(z). \\]\nTwo readable terms: **exploit** (how much better × prob of being better) + **explore** (σ times the density at the threshold).",
+pages:["**The derivation, line by line.** \\( \\mathbb{E}[(f - f^*)^+] = \\int_{f^*}^{\\infty} (t - f^*)\\,\\varphi_{\\mu,\\sigma}(t)\\,dt \\). Substitute \\( t = \\mu + \\sigma u \\):\n\\[ = \\int_{-z}^{\\infty} (\\mu - f^* + \\sigma u)\\,\\varphi(u)\\,du = (\\mu - f^*)\\Phi(z) + \\sigma\\varphi(z), \\]\nusing \\( \\int_{-z}^\\infty u\\varphi(u)du = \\varphi(z) \\). Same integral as the Black–Scholes call — EI *is* an option price on improvement.",
+"**Why LogEI exists.** Far from the incumbent, EI underflows to exactly 0 in floats → zero gradients → optimizers stall on flat acquisition surfaces. Working with \\( \\log \\mathrm{EI} \\) (with numerically stable \\( \\log(\\Phi), \\log(\\varphi) \\) compositions) keeps gradients alive everywhere.\nA one-line change worth whole benchmark gaps — the qLogEI story you can tell from the inside."]},
+
+{id:"ml06",cat:"mlai",type:"concept",diff:2,title:"UCB & Thompson sampling",
+body:"**UCB**: score \\( \\mu(x) + \\beta\\,\\sigma(x) \\) — optimism in the face of uncertainty; β tunes exploration and drives regret bounds.\n**Thompson**: draw one function from the posterior, maximize the draw. Randomized, embarrassingly parallel, and eerily hard to beat.",
+pages:["**How to choose among EI/UCB/TS.** EI: greedy-ish, great with few evaluations. UCB: principled knobs, theory-friendly. TS: batch/async for free (independent draws), robust to model misfit in practice.\nAnd the connection to bandits: your CREST work on UCB is literally this β, one arm per x — BO is bandits with a continuum of correlated arms."]},
+
+{id:"ml07",cat:"mlai",type:"concept",diff:3,title:"Batch acquisitions (q > 1)",
+body:"Choosing q points jointly: \\( q\\mathrm{EI} = \\mathbb{E}[\\max_i (f(x_i) - f^*)^+] \\) — no closed form; estimate by **Monte Carlo with the reparameterization trick** (sample joint posteriors via Cholesky, differentiate through).\nThe max inside creates natural diversity: clones add nothing.",
+pages:["**The smoothing knobs.** MC + max + ReLU = kinks → noisy gradients. qLogEI replaces max with a soft-max and the ReLU with a soft-plus, each with a temperature (the \\( \\tau_{\\max}, \\tau_{\\text{relu}} \\) pair): small τ = faithful but rough, large τ = smooth but biased.\nAlternatives worth naming: fantasies/sequential greedy (fill in hallucinated observations point by point — a 1−1/e approximation by submodularity), and TS batches."]},
+
+{id:"ml08",cat:"mlai",type:"concept",diff:3,title:"TuRBO: trust regions for high-D BO",
+body:"Global GPs in high dimensions produce vacuous uncertainty → acquisition chases corners. **TuRBO** goes local: a hyper-rectangle trust region around the incumbent, a local GP inside, region **expands on successes, shrinks on failures**, restarts when it collapses.\nLocal honesty beats global delusion.",
+pages:["**The mechanics that matter.** Success/failure counters with thresholds; side lengths scaled per-dimension by the GP's ARD lengthscales (move far along flat directions, gingerly along wiggly ones); implicit multi-start via restarts.\nThe open questions you can speak to: how to *initialize* the region size from the data (lengthscale-driven L = f(ρ)-style rules), and when a fitted-GP diagnostic should trigger the local→global switch. Benchmarks care; so do interviewers."]},
+
+{id:"ml09",cat:"mlai",type:"concept",diff:2,title:"Cross-validation without lying",
+body:"k-fold answers “how well would this pipeline do on fresh data” — **only if the pipeline (scaling, feature selection, tuning) is refit inside every fold**. Preprocessing on the full data first = leakage, optimism, tears.",
+pages:["**Time series: the special regime.** Shuffled folds leak the future. Use forward-chaining (train on past, test on next block) and, for overlapping-label problems, **purge** samples whose labels overlap the test window and **embargo** a buffer after it.\nWorked leak: standardizing prices with the full-sample mean quietly hands each fold the future average level. Small crime, big Sharpe."]},
+
+{id:"ml10",cat:"mlai",type:"concept",diff:2,title:"Forests vs boosting",
+body:"**Random forest** = bagging: average deep, decorrelated trees → variance ↓, bias ~flat. Parallel, robust, hard to ruin.\n**Gradient boosting** = sequential: each shallow tree fits the previous residuals → bias ↓ step by step. Stronger, but tunable into overfitting.",
+pages:["**Knobs that matter for boosting.** Learning rate (shrinkage) × number of trees (lower rate + more trees generalizes better), tree depth (interaction order), subsampling rows/columns (decorrelation, à la forest).\nWhy trees still rule tabular data: robustness to monotone transforms, native missing-value handling, sharp thresholds — the inductive bias matches spreadsheets better than smooth nets do."]},
+
+{id:"ml11",cat:"mlai",type:"concept",diff:2,title:"Regularization beyond L1/L2",
+body:"Early stopping, dropout, data augmentation, weight decay, small batches' noise — all shrink the effective hypothesis space.\n**Early stopping ≈ ridge**: along gradient flow, directions with small eigenvalues learn slowly, so stopping early caps them — an implicit spectral shrinkage.",
+pages:["**Double descent, the headline.** Test error can fall, rise near the interpolation threshold, then **fall again** as models grow past it — over-parameterized minima found by SGD are implicitly regularized (min-norm bias).\nWhat to say in interviews: classical U-curves are not wrong, they describe the under-parameterized half; modern practice lives on the second slope."]},
+
+{id:"ml12",cat:"mlai",type:"concept",diff:2,title:"SGD, honestly",
+body:"Noise is a feature: stochastic gradients escape saddles and prefer **flat minima** (which generalize). Momentum ≈ heavy ball, smooths the zig-zag; LR schedules (warmup → decay) trade exploration for convergence.\nBatch size ↑ ⇒ LR can scale up too (linear-ish, until it can't).",
+pages:["**The two-line intuition for flatness.** Sharp minima: tiny parameter shifts (train/test distribution wiggle) cause big loss jumps; flat minima are robust. SGD's noise cannot sit still in a narrow valley — it diffuses out and settles where it fits.\nAlso the honest caveat: “flatness” is parameterization-dependent; the story is a heuristic with good empirical manners, not a theorem."]},
+
+{id:"ml13",cat:"mlai",type:"concept",diff:2,title:"Backprop = chain rule + caching",
+body:"Forward pass stores activations; backward pass reuses them to compute all gradients in **one sweep** — same cost order as the forward pass. That reuse (dynamic programming on the compute graph) is the entire magic.\nMemory bill: activations, not weights — hence checkpointing.",
+pages:["**Vanishing/exploding, and the fixes as one story.** Deep chains multiply Jacobians; spectra drift → gradients die or blow up. Residual connections add an identity path (Jacobian ≈ I + small), normalization layers re-center scales, careful init sets the spectrum near 1.\nAll three are the same fix — keep the product of Jacobians near the identity — implemented at three different layers of the stack."]},
+
+{id:"ml14",cat:"mlai",type:"concept",diff:2,title:"Attention in one card",
+body:"\\[ \\mathrm{Attn}(Q,K,V) = \\mathrm{softmax}\\!\\Big(\\tfrac{QK^\\top}{\\sqrt{d}}\\Big)V. \\]\nEach token builds its output as a **data-dependent weighted average** of values — a learned, content-addressed lookup. Cost \\( O(n^2 d) \\) in sequence length.",
+pages:["**Why the √d.** Dot products of d-dimensional random-ish vectors have variance ∝ d; unscaled, softmax saturates → one-hot attention → dead gradients. Dividing by √d keeps logits O(1).\nA framing that lands: attention is a **kernel smoother** with learned similarity — the transformer is nearest-neighbors that went to the gym."]},
+
+{id:"ml15",cat:"mlai",type:"concept",diff:2,title:"Calibration & proper scoring",
+body:"A forecast of 70% should verify ~70% of the time. **Proper scoring rules** (log loss, Brier) are minimized by honest probabilities — accuracy is not one of them.\nCheck with reliability diagrams; recalibrate with Platt/isotonic if needed.",
+pages:["**The PIT bridge.** For full densities, calibration ⟺ PIT values \\( F_t(x_t) \\) look U(0,1) (card m12): U-shaped histogram = overconfident, humped = underconfident.\nWhy a quant cares: position sizing consumes *probabilities*, not labels — a sharp but miscalibrated model sizes wrongly exactly when it matters."]},
+
+{id:"ml16",cat:"mlai",type:"concept",diff:2,title:"Feature importance, with skepticism",
+body:"Impurity-based importances are biased toward high-cardinality features; **correlated features split credit** arbitrarily; permutation importance breaks the joint distribution when features co-move.\nSHAP allocates fairly *given the model* — which is not the same as causally.",
+pages:["**The protocol that survives.** (1) Cluster correlated features, importance per cluster. (2) Permute within clusters, or retrain-without (leave-one-covariate-out). (3) Confidence intervals via refits — importance without error bars is decoration.\nAnd the sentence to say: “importance describes the model's reliance, not the world's mechanism.”"]},
+
+{id:"ml17",cat:"mlai",type:"concept",diff:3,title:"Comparing models under noise",
+body:"CV scores are random variables: report the **standard error across folds**, and prefer the simplest model within one SE of the best (the 1-SE rule).\nTesting 50 model variants and picking the top raw score = multiple testing (t14) with extra steps.",
+pages:["**Nested CV, when it matters.** Tuning hyperparameters *and* estimating generalization on the same folds is optimistic — the tuner saw the folds. Outer loop for the estimate, inner loop for the tuning.\nCosts compute, buys honesty; for model-zoo strategy research it is the difference between a paper result and a live result."]},
+
+{id:"ml18",cat:"mlai",type:"fact",diff:3,title:"Infinite networks are GPs",
+body:"A one-hidden-layer network with random weights converges, as width → ∞, to a **Gaussian process** (Neal 1996); deep versions give NNGP/NTK kernels.\nMoral: the GP-vs-NN border is thinner than the tribes admit — width buys Gaussianity, feature *learning* is what finite nets add.",
+pages:["**Scaling GPs when n grows.** Exact \\( O(n^3) \\) dies around \\( n \\sim 10^4 \\): inducing-point variational GPs (SVGP) cost \\( O(nm^2) \\) with m ≪ n pseudo-points; alternatives: random features, KISS-GP structure, conjugate-gradient GPs on GPUs.\nKnowing the menu — and that BoTorch/GPyTorch serve most of it — is the practical answer to “but does it scale?”"]}
+
+]);
+
+/* =========================================================================
+   PACK: MENTAL MATH (mm) — Optiver/Flow-style speed kit
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"mm01",cat:"mental",type:"concept",diff:1,title:"Fractions ↔ decimals, cold",
+body:"1/6 = .1667 · 1/7 = .1429 · 1/8 = .125 · 1/9 = .1̄ · 1/11 = .0909 · 1/12 = .0833 · 1/13 ≈ .0769 · 1/16 = .0625 · 1/24 ≈ .0417.\nSevenths cycle: **142857** rotates — 2/7 = .2857, 3/7 = .4286, 4/7 = .5714, 5/7 = .7143, 6/7 = .8571.",
+pages:["**Use them as anchors.** 23/7? = 3 + 2/7 = 3.286 instantly. 5/12 = 1/3 + 1/12 = .4167. Elevenths: repeating 09·k → 7/11 = .6364.\nSpeed drills reward *decomposition into known anchors*, not division. Build the reflex: see a fraction → nearest anchor ± correction."]},
+
+{id:"mm02",cat:"mental",type:"question",diff:1,title:"Squares in two seconds",
+body:"Compute 47², 63², 85² — without paper. What machinery?",
+answer:"**47² = 2209**: (50−3)² = 2500 − 300 + 9.\n**63² = 3969**: (60+3)² = 3600 + 360 + 9.\n**85² = 7225**: ends in 5 → n(n+1) | 25 → 8×9 = 72, append 25.\nThree templates: near 50, near a round number, ends-in-5.",
+pages:["**Plus the difference of squares.** \\( a\\cdot b = \\big(\\tfrac{a+b}{2}\\big)^2 - \\big(\\tfrac{a-b}{2}\\big)^2 \\): 17 × 23 = 20² − 3² = **391**; 48 × 52 = 2500 − 4 = 2496.\nAny product of numbers straddling a round center collapses this way — the single highest-yield trick in arithmetic sprints."]},
+
+{id:"mm03",cat:"mental",type:"concept",diff:1,title:"Shift tricks: ×5, ×25, ×11",
+body:"×5 = ×10 ÷ 2 · ×25 = ×100 ÷ 4 · ×50 = ×100 ÷ 2 · ×125 = ×1000 ÷ 8.\n×11: insert digit sums — 53 × 11: 5 (5+3) 3 = **583**; carry when needed: 87 × 11 → 8 (15) 7 → 957.",
+pages:["**Division mirrors it.** ÷5 = ×2 ÷ 10 (348 ÷ 5 = 69.6); ÷25 = ×4 ÷ 100; ÷125 = ×8 ÷ 1000.\nAnd the commutation trick for percentages: **x% of y = y% of x** — 8% of 25 = 25% of 8 = 2. Free lunch, daily."]},
+
+{id:"mm04",cat:"mental",type:"concept",diff:1,title:"Constants you must own",
+body:"√2 ≈ 1.414 · √3 ≈ 1.732 · √5 ≈ 2.236 · π ≈ 3.1416 · e ≈ 2.718 · ln 2 ≈ 0.693 · ln 10 ≈ 2.303 · log₁₀2 ≈ 0.301 · 1/e ≈ 0.368.\nPowers of 2: 2¹⁰ = 1024 ≈ 10³, 2¹⁶ = 65 536, 2²⁰ ≈ 1.05 M, 2³² ≈ 4.3 B.",
+pages:["**Stretch them with Taylor.** \\( \\sqrt{1+x} \\approx 1 + \\tfrac x2 \\): √50 = 5√2 ≈ 7.07; √17 = 4√(1+1/16) ≈ 4.12.\nLogs by decomposition: ln 5 = ln 10 − ln 2 ≈ 1.61; log₁₀ 7 ≈ log₁₀ 49 / 2 ≈ (2 × 0.845)/2 → 0.845. Constants + one expansion = a slide rule in your head."]},
+
+{id:"mm05",cat:"mental",type:"question",diff:2,title:"Compound in your head",
+body:"1.05¹⁰ ≈ ? 0.99⁵⁰ ≈ ? What is the engine?",
+answer:"**\\( (1+x)^n \\approx e^{nx} \\)** for smallish x.\n1.05¹⁰ ≈ e^0.5·… precisely: 10 × ln 1.05 ≈ 10 × 0.0488 = 0.488 → e^0.488 ≈ **1.63**.\n0.99⁵⁰ ≈ e^{−0.5} ≈ **0.61**.\nRefine with the second-order term \\( e^{nx - nx^2/2} \\) when x is not tiny.",
+pages:["**Finance dialect.** Rule of 72 (m09) is this engine packaged. Vol scaling: σ_daily ≈ σ_annual/16 (√252 ≈ 15.9): a 2% daily move on a 20%-vol stock is a 1.6σ day — computed before the interviewer finishes the sentence.\nBond flavor: a 10-year zero at 4%: price ≈ e^{−0.4} ≈ 0.67 of par."]},
+
+{id:"mm06",cat:"mental",type:"concept",diff:1,title:"Estimation discipline",
+body:"Round to 1–2 significant figures, **track the powers of ten separately**, and note the direction of each rounding so you can compensate at the end.\n37 × 52: 40 × 50 = 2000, corrections −3×52 (−156) + … or straight: ≈ 1900 (exact 1924).",
+pages:["**Error budget thinking.** Multiplying k rounded numbers: relative errors *add*. Two 3% roundings in the same direction ⇒ ~6% off — decide upfront whether the question needs 2 digits or an order of magnitude, and spend effort accordingly.\nSprint tactic: answer bands (“between 1850 and 2000”) are often accepted — and always safer."]},
+
+{id:"mm07",cat:"mental",type:"question",diff:2,title:"Casting out nines (and elevens)",
+body:"You computed 487 × 362 = 176 294 under time pressure. Fast sanity check?",
+answer:"**Digit sums mod 9**: 487 → 19 → 1; 362 → 11 → 2; product ≡ 2 (mod 9). Answer: 1+7+6+2+9+4 = 29 → 2 ✓ (necessary, not sufficient).\nMod 11 (alternating digit sums) catches transpositions that mod 9 misses. Two five-second checks kill most sprint errors.",
+pages:["**Also: last-digit and magnitude gates.** 487 × 362 ends in 7×2 = …4 ✓; size gate: ≈ 500 × 360 = 180k ✓.\nStack three independent weak checks and the joint error rate collapses — the arithmetic version of ensemble methods."]},
+
+{id:"mm08",cat:"mental",type:"concept",diff:1,title:"Sums on tap",
+body:"\\( 1 + \\cdots + n = \\tfrac{n(n+1)}{2} \\) · \\( \\sum k^2 = \\tfrac{n(n+1)(2n+1)}{6} \\) · \\( \\sum k^3 = \\big(\\tfrac{n(n+1)}{2}\\big)^2 \\).\nExpected values on tap: die = 3.5, two dice = 7, U(0,1): mean ½, variance **1/12**.",
+pages:["**Variance of a die, from the sums.** \\( \\mathbb{E}[X^2] = \\tfrac{91}{6} \\) (sum of squares 1..6 = 91) → Var = 91/6 − 12.25 = **35/12 ≈ 2.92**, σ ≈ 1.71.\nThese two sum formulas + Var = E[X²] − (E[X])² manufacture half of all quick-probability arithmetic."]},
+
+{id:"mm09",cat:"mental",type:"concept",diff:2,title:"The 80-in-8 game plan",
+body:"Optiver-style tests: ~80 questions, 8 minutes, **negative marking**. The meta-skill is triage: answer what you see instantly, skip anything requiring thought, never guess blind.\nAccuracy at speed beats speed at accuracy — the scoring says so.",
+pages:["**Training protocol that works.** Daily 2-minute sprints (Zetamac-style settings: add/sub to 100, mult to 12×99, div inverse), log scores, one new trick per week from these cards until it is automatic.\nPlateau ≈ two weeks in; push through with *harder* settings, not longer sessions. Test day: first pass easy-only, second pass the rest."]},
+
+{id:"mm10",cat:"mental",type:"question",diff:2,title:"Fast Fermi frame",
+body:"Estimate: how many petrol stations in France?",
+answer:"Anchor on people: ~68 M ≈ 40 M cars. A station serves maybe 3–4 k cars (fill-ups/week ÷ station throughput) → **~10 000** stations. (Reality ≈ 11 000.)\nMethod > number: population anchor → per-unit ratio → sanity check both ends.",
+pages:["**The three universal anchors.** Population (68 M FR, 340 M US, 8 B world), rates (1 year ≈ π×10⁷ s ≈ 500 k min ≈ 8 800 h), and money (French GDP ≈ €2.8 T).\nMost Fermi chains are two ratios away from one of these. Practice saying the chain, not just the answer — calibration (mk08) is scored on the reasoning."]},
+
+{id:"mm11",cat:"mental",type:"question",diff:2,title:"Percent gymnastics",
+body:"A price rises 20% then falls 20% — net? And what is −5% then +5%? The general rule?",
+answer:"Down **4%** and down **0.25%**: \\( (1+x)(1-x) = 1 - x^2 \\) — round trips always lose the square.\nGeneral chain: add the percents, **subtract half the sum of squares**-ish: precisely, \\( (1+a)(1+b) = 1 + a + b + ab \\); the cross term is the whole story.",
+pages:["**Vol drag, spotted early.** This −x² is exactly the volatility drag of c08: an asset alternating ±σ compounds at \\( -\\tfrac{\\sigma^2}{2} \\) per period vs its average return.\nAlso the leveraged-ETF decay: 2× daily leverage squares the wiggles — quadruples the drag. One identity, three interview answers."]},
+
+{id:"mm12",cat:"mental",type:"concept",diff:2,title:"Approximate everything with logs",
+body:"Big products/powers → logs → add. How many digits in \\( 2^{100} \\)? \\( 100\\log_{10}2 = 30.1 \\) → **31 digits**.\n\\( 50! \\)? Stirling-lite: \\( \\log_{10}50! \\approx 50\\log_{10}50 - 50\\log_{10}e \\approx 50(1.7) - 21.7 \\approx 63 \\) → ~10⁶⁴.",
+pages:["**Why this matters beyond party tricks.** Log-space is how you compare likelihoods, information (bits = log₂), and compound growth without overflow — mentally *and* in code (log-sum-exp, LogEI…).\nReflex to build: any question with “how many digits / how big roughly / after n periods” → take logs first, exponentiate last."]}
+
+]);
+
+/* =========================================================================
+   PACK: MEASURE THEORY (me) — Oxford warm-up
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"me01",cat:"measure",type:"concept",diff:2,title:"σ-algebras & why not all sets",
+body:"A σ-algebra: contains Ω, closed under complements and **countable** unions — the collection of events you can legally measure. Borel sets = the σ-algebra generated by open sets.\nWhy not all subsets? Vitali: with the axiom of choice, a set exists that *no* translation-invariant measure can size consistently.",
+pages:["**Measurable functions.** f is measurable iff preimages of Borel sets are events: \\( f^{-1}(B) \\in \\mathcal{F} \\). Compositions, limits, sups of measurable functions stay measurable — the class is closed under everything you will actually do.\nRandom variable = measurable function; “X is \\( \\mathcal{G} \\)-measurable” = X is computable from the information in \\( \\mathcal{G} \\). The probability dialect of s01."]},
+
+{id:"me02",cat:"measure",type:"concept",diff:2,title:"The Lebesgue integral, built",
+body:"Three floors: (1) simple functions \\( \\sum a_i \\mathbf{1}_{A_i} \\) — integrate by definition; (2) nonnegative f: \\( \\int f = \\sup \\) over simple functions below; (3) general f: \\( \\int f^+ - \\int f^- \\), defined when not ∞ − ∞.\nNull sets are invisible: change f on measure zero, nothing moves — hence “almost everywhere”.",
+pages:["**Riemann vs Lebesgue in one image.** Riemann slices the *domain* (columns), Lebesgue slices the *range* (layers): \\( \\int f = \\int_0^\\infty \\mu(f > t)\\,dt \\) — which is exactly the tail-sum formula p20.\nWhy the rebuild pays: limits pass through Lebesgue integrals under clean conditions (MCT/DCT), while Riemann breaks on \\( \\mathbf{1}_{\\mathbb{Q}} \\)."]},
+
+{id:"me03",cat:"measure",type:"concept",diff:2,title:"Monotone convergence",
+body:"\\( 0 \\le f_n \\uparrow f \\) ⇒ \\( \\int f_n \\uparrow \\int f \\).\nNo domination needed — monotonicity alone. The workhorse for: interchanging \\( \\sum \\) and \\( \\int \\) with nonnegative terms (Tonelli's little sibling), and defining integrals constructively.",
+pages:["**Drop a hypothesis, watch it die.** Without monotonicity: \\( f_n = n\\,\\mathbf{1}_{(0,1/n)} \\to 0 \\) pointwise but \\( \\int f_n = 1 \\) — mass escapes to a spike.\nEvery convergence theorem is best memorized *with* its counterexample: the pair is the understanding."]},
+
+{id:"me04",cat:"measure",type:"concept",diff:2,title:"Fatou's lemma",
+body:"For \\( f_n \\ge 0 \\): \\( \\int \\liminf f_n \\le \\liminf \\int f_n \\).\nDirection mnemonic: **mass can escape** (to spikes or to infinity), never appear — the limit function can only have lost.",
+pages:["**Where you deploy it.** Proving a limit is integrable before you know convergence of integrals; the standard step in proving DCT and in martingale convergence (bounding \\( \\mathbb{E}[\\liminf] \\)).\nThe escape gallery: spikes \\( n\\mathbf{1}_{(0,1/n)} \\) (height), sliders \\( \\mathbf{1}_{(n,n+1)} \\) (horizon) — both give strict inequality 0 < 1."]},
+
+{id:"me05",cat:"measure",type:"concept",diff:2,title:"Dominated convergence",
+body:"\\( f_n \\to f \\) a.e. and \\( |f_n| \\le g \\) with \\( \\int g < \\infty \\) ⇒ \\( \\int f_n \\to \\int f \\).\nThe dominator g is a ceiling that forbids escaping mass. **The** theorem you cite when swapping limits and integrals — including expectations.",
+pages:["**Its most-used corollary: differentiate under ∫.** If \\( \\partial_\\theta f(x,\\theta) \\) exists and is dominated uniformly in θ by an integrable g, then \\( \\tfrac{d}{d\\theta}\\int f = \\int \\partial_\\theta f \\).\nThat is the license behind Feynman's trick (m08) and behind differentiating \\( \\mathbb{E}[e^{\\theta X}] \\) to harvest moments. When an interviewer asks “why can you do that?” — this is the answer, with the dominating function named."]},
+
+{id:"me06",cat:"measure",type:"question",diff:3,title:"Fubini vs Tonelli",
+body:"When may you swap a double integral's order — and what breaks otherwise?",
+answer:"**Tonelli**: f ≥ 0 — always swap (both sides possibly ∞).\n**Fubini**: \\( \\int |f| < \\infty \\) — swap, everything finite.\nThe ritual: run Tonelli on |f| first; if that is finite, Fubini unlocks the signed swap.",
+pages:["**The canonical counterexample.** On ℕ²: \\( a_{nn} = 1 \\), \\( a_{n+1,n} = -1 \\), else 0. Rows: first row sums 1, every other row 0 → Σ = **1**. Columns: each contains +1 and −1 → Σ = **0**.\nAbsolute summability fails, and the two orders honestly disagree. Keep this 2-line grid in your pocket — it settles “why the |f| condition?” forever."]},
+
+{id:"me07",cat:"measure",type:"concept",diff:3,title:"Radon–Nikodym",
+body:"If \\( \\nu \\ll \\mu \\) (ν vanishes wherever μ does), there is a density \\( \\tfrac{d\\nu}{d\\mu} \\) with \\( \\nu(A) = \\int_A \\tfrac{d\\nu}{d\\mu}\\,d\\mu \\).\n**One theorem, three careers**: likelihoods (densities w.r.t. Lebesgue), conditional expectation, and change of measure (\\( d\\mathbb{Q}/d\\mathbb{P} \\), Girsanov).",
+pages:["**How it defines conditional expectation.** For X integrable, \\( A \\mapsto \\mathbb{E}[X\\mathbf{1}_A] \\) is a (signed) measure on \\( \\mathcal{G} \\), absolutely continuous w.r.t. \\( \\mathbb{P} \\); its RN-density **is** \\( \\mathbb{E}[X\\mid\\mathcal{G}] \\).\nSo the mysterious defining property of p02 is just “density of one measure against another”. This single connection makes measure theory feel earned rather than inflicted."]},
+
+{id:"me08",cat:"measure",type:"concept",diff:2,title:"Convergence modes, measure edition",
+body:"a.e. ⇒ in measure (on finite spaces); in measure ⇒ a subsequence converges a.e.; \\( L^p \\) ⇒ in measure. Nothing else without extra hypotheses.\nThe two counterexample machines: **spikes** (kill \\( L^1 \\) despite a.e.) and the **typewriter** (in measure without a.e.).",
+pages:["**The typewriter, spelled out.** Indicators of \\( [0,1] \\)'s dyadic intervals cycling: [0,½],[½,1],[0,¼],[¼,½],… Lengths → 0 so convergence *in measure* to 0; but every point is hit infinitely often — a.e. convergence fails everywhere.\nA subsequence (one interval per generation) does converge a.e. — illustrating the subsequence theorem in the same breath. One example, two theorems."]},
+
+{id:"me09",cat:"measure",type:"concept",diff:3,title:"π-systems & uniqueness",
+body:"Two measures agreeing on a **π-system** (closed under finite intersections) that generates the σ-algebra — and agreeing on total mass — agree everywhere (Dynkin).\nThis is *why CDFs determine laws*: intervals \\( (-\\infty, x] \\) form a π-system generating the Borel sets.",
+pages:["**Where else it quietly works.** Independence needs checking only on generating π-systems (rectangles suffice for product structure); Kolmogorov's extension builds processes from finite-dimensional laws for the same reason.\nExam reflex: any “two things agree on simple sets, hence everywhere” claim is Dynkin's lemma wearing a fake mustache."]},
+
+{id:"me10",cat:"measure",type:"concept",diff:3,title:"Independence & the 0–1 law",
+body:"Independence of σ-algebras is the real definition; independent random variables = independent generated σ-algebras.\n**Kolmogorov 0–1**: any *tail* event of an independent sequence (unchanged by altering finitely many terms) has probability 0 or 1. Convergence of \\( \\sum X_n \\), \\( \\limsup \\) behavior: all deterministic in advance.",
+pages:["**Why it feels magic, and is not.** The tail σ-algebra is independent of every finite prefix — hence (by a π-system argument!) independent of *itself*: \\( \\mathbb{P}(A) = \\mathbb{P}(A)^2 \\).\nApplication with teeth: “does the random walk cross zero infinitely often?” has a 0-or-1 answer before any computation; the computation (recurrence) only decides *which*."]},
+
+{id:"me11",cat:"measure",type:"concept",diff:2,title:"Lᵖ spaces & the inequality chain",
+body:"**Hölder**: \\( \\int|fg| \\le \\|f\\|_p\\|g\\|_q \\), \\( \\tfrac1p+\\tfrac1q = 1 \\); p = q = 2 is Cauchy–Schwarz; Minkowski = the triangle inequality that makes \\( \\|\\cdot\\|_p \\) a norm.\nOn probability spaces: \\( L^r \\subset L^p \\) for r > p — higher moments are stronger statements.",
+pages:["**The chain you can recite.** Hölder ⇒ Cauchy–Schwarz ⇒ \\( \\mathbb{E}[XY]^2 \\le \\mathbb{E}X^2\\,\\mathbb{E}Y^2 \\) ⇒ \\( |\\rho| \\le 1 \\) ⇒ variance decompositions behave.\nAlso Lyapunov: \\( \\|X\\|_p \\) is increasing in p (finite measure) — which is exactly why “finite 4th moment” buys you concentration that “finite variance” cannot."]},
+
+{id:"me12",cat:"measure",type:"concept",diff:3,title:"Uniform integrability",
+body:"A family is UI when its tails vanish *uniformly*: \\( \\sup_n \\mathbb{E}[|X_n|\\mathbf{1}_{|X_n|>K}] \\to 0 \\).\n**The missing link**: convergence in probability + UI ⟺ convergence in \\( L^1 \\). Also exactly hypothesis (c) of optional stopping — the one the doubling paradox violates.",
+pages:["**How you actually verify it.** De la Vallée-Poussin: \\( \\sup_n \\mathbb{E}[\\Phi(|X_n|)] < \\infty \\) for some superlinear Φ suffices — in practice: **a uniformly bounded (1+ε)-moment implies UI**.\nSo “bounded in L²” is the phrase that unlocks L¹ limits, OST, and martingale convergence upgrades. One checkable condition, three theorems."]},
+
+{id:"me13",cat:"measure",type:"concept",diff:2,title:"Pushforward & LOTUS",
+body:"The law of X is the pushforward \\( \\mu_X = \\mathbb{P}\\circ X^{-1} \\), and\n\\[ \\mathbb{E}[g(X)] = \\int_\\Omega g(X)\\,d\\mathbb{P} = \\int_{\\mathbb{R}} g\\,d\\mu_X. \\]\nThe “law of the unconscious statistician” is a change of variables — legal, with a proof, not a folk custom.",
+pages:["**Why it earns its keep.** It licenses computing expectations from densities/CDFs without ever mentioning Ω — the daily practice of probability, formally justified.\nCombined with me09: since \\( \\mu_X \\) is pinned by the CDF, *every* expectation \\( \\mathbb{E}[g(X)] \\) is determined by F. Distribution = complete interface; Ω = implementation detail."]},
+
+{id:"me14",cat:"measure",type:"fact",diff:3,title:"Carathéodory, in one breath",
+body:"Lebesgue measure exists: define outer measure by countable interval covers, call A measurable when it **splits every set additively** (\\( \\mu^*(E) = \\mu^*(E\\cap A) + \\mu^*(E\\setminus A) \\)), and Carathéodory's theorem delivers a genuine σ-algebra and a countably additive measure.\nNon-measurable sets (Vitali) need the axiom of choice — you will never build one by accident.",
+pages:["**What to retain for exams and life.** (1) The splitting condition is a *definition of good behavior*, not a property to picture. (2) Completeness: subsets of null sets are measurable — Lebesgue > Borel. (3) Every construction you meet later (product measures, Hausdorff measures) replays this outer-measure two-step.\nDepth on demand; the skeleton fits on a card."]}
+
+]);

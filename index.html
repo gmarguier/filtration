@@ -290,6 +290,31 @@ h2.title{
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ---------- self-grading ---------- */
+.answer .grade{display:none;gap:8px;margin-top:10px;position:relative;z-index:3}
+.answer.revealed .grade{display:flex}
+.gr{flex:1;padding:10px;border-radius:11px;font-size:13.5px;font-weight:600;
+  border:1px solid var(--line);background:rgba(233,228,216,.05);color:var(--paper-dim)}
+.gr:active{transform:scale(.97)}
+.gr.gr-r.sel{color:var(--ink);background:var(--hue);border-color:var(--hue)}
+.gr.gr-w.sel{color:#FF8A8A;border-color:rgba(255,138,138,.5);background:rgba(255,138,138,.12)}
+.gr[disabled]:not(.sel){opacity:.45}
+
+/* ---------- daily session ---------- */
+#session{position:fixed;inset:0;z-index:56;background:var(--ink);display:none;flex-direction:column}
+#session.open{display:flex}
+.sess-head{display:flex;align-items:center;gap:8px;padding:calc(var(--safe-t) + 10px) 14px 8px}
+.sess-head .mclose{position:static;flex-shrink:0}
+.sess-title{font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:17px;margin-right:auto}
+.pill{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;padding:5px 9px;
+  border:1px solid var(--line);border-radius:999px;color:var(--paper-dim)}
+#sess-slot{flex:1;overflow:hidden;position:relative}
+#sess-slot .card{height:100%}
+#sess-slot .card-inner{padding-top:14px}
+.sess-end{height:100%;display:flex;flex-direction:column;justify-content:center;gap:14px;padding:22px;max-width:600px;margin:0 auto}
+
+@media (max-width:430px){ .wordmark .name{display:none} }
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
 }
@@ -303,6 +328,9 @@ h2.title{
   </a>
   <div class="progress" id="progress">–</div>
   <div class="hbtns">
+    <button class="hbtn" id="btn-session" aria-label="Daily session">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>
+    </button>
     <button class="hbtn" id="btn-filter" aria-label="Filters">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
     </button>
@@ -356,6 +384,11 @@ h2.title{
       <div class="stat"><div class="v" id="s-mastered">0</div><div class="k">Mastered</div></div>
       <div class="stat"><div class="v" id="s-streak">0</div><div class="k">Day streak</div></div>
     </div>
+    <div class="statgrid" style="margin-top:9px">
+      <div class="stat"><div class="v" id="s-acc">–</div><div class="k">Accuracy</div></div>
+      <div class="stat"><div class="v" id="s-due">0</div><div class="k">Due now</div></div>
+      <div class="stat"><div class="v" id="s-sess">–</div><div class="k">Daily ten best</div></div>
+    </div>
     <div class="slabel">By category</div>
     <div id="s-cats"></div>
     <div class="dangerzone">
@@ -366,6 +399,16 @@ h2.title{
     </div>
   </div>
 </section>
+
+<div id="session">
+  <div class="sess-head">
+    <button class="mclose" id="sess-close" aria-label="Close session">✕</button>
+    <span class="sess-title">Daily ten</span>
+    <span class="pill" id="sess-timer">0:00</span>
+    <span class="pill" id="sess-prog">1 / 10</span>
+  </div>
+  <div id="sess-slot"></div>
+</div>
 
 <div id="modal"><button class="mclose" id="modal-close" aria-label="Close">✕</button><div id="modal-slot"></div></div>
 <div id="toast" role="status"></div>
@@ -383,10 +426,14 @@ var CATS = {
   brainteaser:  {label:"Brainteasers",        color:"#FF9E64"},
   quant:        {label:"Quant Questions",     color:"#53DDAF"},
   finance:      {label:"Finance & Options",   color:"#E9C46A"},
+  markets:      {label:"Markets & MM",        color:"#6FE38D"},
   algo:         {label:"Algorithms & CS",     color:"#5CD6E0"},
-  stats:        {label:"Statistics & ML",     color:"#C0E863"},
+  stats:        {label:"Statistics",          color:"#C0E863"},
+  mlai:         {label:"ML · GP · BayesOpt",  color:"#E39BFF"},
   linalg:       {label:"Linear Algebra",      color:"#E4626F"},
   math:         {label:"Math Toolkit",        color:"#EFE6C0"},
+  mental:       {label:"Mental Math",         color:"#FFE066"},
+  measure:      {label:"Measure Theory",      color:"#C9D6FF"},
   meta:         {label:"Interview Craft",     color:"#9AA3B2"}
 };
 var TYPES = {concept:"Concept", question:"Question", fact:"Fact"};
@@ -431,7 +478,7 @@ function loadState(cb){
 var S = {
   seen:{}, review:{}, mastered:{},
   f:{cats:Object.keys(CATS), types:["concept","question","fact"], diffs:[1,2,3], incMastered:false},
-  streak:0, lastDay:null
+  streak:0, lastDay:null, acc:{}, sessions:[]
 };
 var order = [];        // ids for current cycle
 var rendered = 0;      // cards appended so far
@@ -485,9 +532,15 @@ function currentPool(){
 }
 function buildOrder(){
   var pool = currentPool();
-  var unseen = pool.filter(function(it){ return !S.seen[it.id]; }).map(function(it){ return it.id; });
+  var now = Date.now();
+  var due = pool.filter(function(it){
+    var a = S.acc[it.id];
+    return a && a.due && a.due <= now && S.seen[it.id];
+  }).map(function(it){ return it.id; });
+  var dueSet = {}; due.forEach(function(id){ dueSet[id] = 1; });
+  var unseen = pool.filter(function(it){ return !S.seen[it.id] && !dueSet[it.id]; }).map(function(it){ return it.id; });
   revisit = false;
-  order = shuffle(unseen);
+  order = shuffle(due).concat(shuffle(unseen));
 }
 function poolCounts(){
   var pool = currentPool();
@@ -524,6 +577,7 @@ function cardHTML(it){
   if (it.answer){
     h += '<div class="answer" role="button" tabindex="0" aria-label="Reveal answer">';
     h += '<div class="acontent">'+fmt(it.answer)+'</div>';
+    h += '<div class="grade"><button class="gr gr-w">✗ Missed</button><button class="gr gr-r">✓ Got it</button></div>';
     h += '<div class="alabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/></svg>Tap to reveal</div>';
     h += '</div>';
   }
@@ -557,6 +611,17 @@ function makeCard(it, inModal){
     ans.addEventListener("click", reveal);
     ans.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); reveal(); } });
   }
+  var grs = $$(".gr", el);
+  grs.forEach(function(g){
+    g.addEventListener("click", function(e){
+      e.stopPropagation();
+      if (g.disabled) return;
+      grs.forEach(function(x){ x.disabled = true; });
+      g.classList.add("sel");
+      gradeCard(it.id, g.classList.contains("gr-r"));
+    });
+  });
+
   var pager = $(".pager", el);
   if (pager){
     var dots = $$(".pdots i", el);
@@ -613,7 +678,10 @@ function completionCard(){
     '<div class="card-inner">'+
     '<div class="done-sym">F<sub>∞</sub></div>'+
     '<h2 class="title">Filtration complete.</h2>'+
-    '<div class="body">Every card in this filter has crossed your feed — '+c.total+' of them. Nothing repeated. What next?</div>'+
+    '<div class="body">Every card in this filter has crossed your feed — '+c.total+' of them. Nothing repeated.'+(function(){
+      var n = currentPool().filter(function(it){ var a = S.acc[it.id]; return a && a.due && a.due > Date.now(); }).length;
+      return n ? " ("+n+" will return for spaced review.)" : "";
+    })()+' What next?</div>'+
     '<div class="done-actions">'+
     '<button class="abtn primary" data-done="revisit">Shuffle everything again<small>Re-scroll all '+c.total+' cards, stats untouched.</small></button>'+
     '<button class="abtn" data-done="resetseen">Reset seen history<small>Start a fresh cycle from zero.</small></button>'+
@@ -705,6 +773,27 @@ function markSeen(id){
   persist(); updateProgress();
 }
 
+/* ---------- self-grading + spaced repetition ---------- */
+var DAY = 86400000;
+var SRS_STEPS = [1, 3, 7];
+function accRec(id){ return S.acc[id] || (S.acc[id] = {r:0, w:0, box:0, due:0}); }
+function gradeCard(id, ok){
+  var rec = accRec(id);
+  if (ok) rec.r++; else rec.w++;
+  if (!ok){
+    rec.box = 0; rec.due = Date.now() + DAY;
+    toast("✗ Noted — back tomorrow");
+  } else if (rec.due){
+    rec.box = (rec.box || 0) + 1;
+    if (rec.box >= SRS_STEPS.length){ rec.due = 0; toast("✓ Graduated out of review"); }
+    else { rec.due = Date.now() + SRS_STEPS[rec.box] * DAY; toast("✓ Back in " + SRS_STEPS[rec.box] + " days"); }
+  } else {
+    toast("✓ Correct");
+  }
+  if (SESSION.active) sessionGraded(ok);
+  persist();
+}
+
 /* ---------- actions ---------- */
 function syncRails(id){
   $$('.card[data-id="'+id+'"]').forEach(function(el){
@@ -716,7 +805,12 @@ function syncRails(id){
 }
 function toggleReview(id){
   if (S.review[id]) { delete S.review[id]; toast("Removed from Review"); }
-  else { S.review[id] = Date.now(); toast("Saved to Review"); }
+  else {
+    S.review[id] = Date.now();
+    var rec = accRec(id);
+    if (!rec.due){ rec.box = 0; rec.due = Date.now() + DAY; }
+    toast("Saved to Review");
+  }
   persist(); syncRails(id); refreshListCounts();
 }
 function toggleMastered(id){
@@ -852,14 +946,30 @@ function renderStats(){
   $("#s-seen").textContent = seenN + "/" + ITEMS.length;
   $("#s-mastered").textContent = Object.keys(S.mastered).length;
   $("#s-streak").textContent = (S.streak||0);
+
+  var R = 0, W = 0, dueN = 0, now = Date.now();
+  Object.keys(S.acc || {}).forEach(function(id){
+    var a = S.acc[id]; if (!byId[id]) return;
+    R += a.r || 0; W += a.w || 0;
+    if (a.due && a.due <= now) dueN++;
+  });
+  $("#s-acc").textContent = (R + W) ? Math.round(100 * R / (R + W)) + "%" : "–";
+  $("#s-due").textContent = dueN;
+  var bestS = null;
+  (S.sessions || []).forEach(function(x){ if (!bestS || x.score > bestS.score) bestS = x; });
+  $("#s-sess").textContent = bestS ? bestS.score + "/" + bestS.total : "–";
+
   var box = $("#s-cats"); box.innerHTML = "";
   Object.keys(CATS).forEach(function(k){
     var all = ITEMS.filter(function(it){ return it.cat===k; });
     if (!all.length) return;
     var seen = all.filter(function(it){ return S.seen[it.id]; }).length;
+    var cr = 0, cw = 0;
+    all.forEach(function(it){ var a = S.acc[it.id]; if (a){ cr += a.r||0; cw += a.w||0; } });
+    var accTxt = (cr + cw) ? " · " + Math.round(100 * cr / (cr + cw)) + "%" : "";
     var row = document.createElement("div");
     row.className = "cbar"; row.style.setProperty("--c", CATS[k].color);
-    row.innerHTML = '<div class="ct"><b>'+CATS[k].label+'</b><span>'+seen+' / '+all.length+'</span></div>'
+    row.innerHTML = '<div class="ct"><b>'+CATS[k].label+'</b><span>'+seen+' / '+all.length+accTxt+'</span></div>'
       + '<div class="track"><div class="fill" style="width:'+(all.length?Math.round(100*seen/all.length):0)+'%"></div></div>';
     box.appendChild(row);
   });
@@ -889,10 +999,95 @@ $("#s-resetseen").addEventListener("click", function(){
 });
 $("#s-wipe").addEventListener("click", function(){
   if (!confirm("Erase ALL progress — seen, lists, mastery, streak?")) return;
-  S = {seen:{}, review:{}, mastered:{}, f:{cats:Object.keys(CATS), types:Object.keys(TYPES), diffs:[1,2,3], incMastered:false}, streak:0, lastDay:null};
+  S = {seen:{}, review:{}, mastered:{}, f:{cats:Object.keys(CATS), types:Object.keys(TYPES), diffs:[1,2,3], incMastered:false}, streak:0, lastDay:null, acc:{}, sessions:[]};
   persist(); buildOrder(); rebuildFeed(); updateProgress(); renderStats(); refreshListCounts();
   toast("Clean slate");
 });
+
+/* ---------- daily session ---------- */
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function hashStr(s){
+  var h = 2166136261;
+  for (var i = 0; i < s.length; i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function seededShuffle(arr, rng){
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--){
+    var j = Math.floor(rng() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+var SESSION = {active:false, ids:[], idx:0, score:0, t0:0, timer:null};
+function todaysTen(){
+  var qs = ITEMS.filter(function(it){ return it.type === "question"; }).map(function(it){ return it.id; });
+  var rng = mulberry32(hashStr("filtration-" + todayStr()));
+  return seededShuffle(qs, rng).slice(0, 10);
+}
+function startSession(){
+  SESSION.active = true; SESSION.ids = todaysTen();
+  SESSION.idx = 0; SESSION.score = 0; SESSION.t0 = Date.now();
+  $("#session").classList.add("open");
+  sessionTick();
+  clearInterval(SESSION.timer);
+  SESSION.timer = setInterval(sessionTick, 1000);
+  sessionRender();
+}
+function sessionTick(){
+  var s = Math.floor((Date.now() - SESSION.t0) / 1000);
+  $("#sess-timer").textContent = Math.floor(s/60) + ":" + ("0" + (s % 60)).slice(-2);
+}
+function sessionRender(){
+  $("#sess-prog").textContent = (SESSION.idx + 1) + " / " + SESSION.ids.length;
+  var slot = $("#sess-slot"); slot.innerHTML = "";
+  slot.appendChild(makeCard(byId[SESSION.ids[SESSION.idx]], true));
+}
+function sessionGraded(ok){
+  if (ok) SESSION.score++;
+  SESSION.idx++;
+  if (SESSION.idx >= SESSION.ids.length) endSession();
+  else setTimeout(sessionRender, 380);
+}
+function endSession(){
+  clearInterval(SESSION.timer);
+  SESSION.active = false;
+  var secs = Math.round((Date.now() - SESSION.t0) / 1000);
+  var day = todayStr();
+  S.sessions = S.sessions || [];
+  var prev = null;
+  S.sessions.forEach(function(x){ if (x.day === day) prev = x; });
+  var better = !prev || SESSION.score > prev.score || (SESSION.score === prev.score && secs < prev.secs);
+  if (!prev) S.sessions.push({day:day, score:SESSION.score, total:SESSION.ids.length, secs:secs});
+  else if (better){ prev.score = SESSION.score; prev.secs = secs; prev.total = SESSION.ids.length; }
+  persist();
+  var best = 0; S.sessions.forEach(function(x){ if (x.score > best) best = x.score; });
+  var mm = Math.floor(secs/60) + ":" + ("0" + (secs % 60)).slice(-2);
+  $("#sess-slot").innerHTML =
+    '<div class="sess-end">'+
+    '<div class="done-sym">'+SESSION.score+'<sub>/'+SESSION.ids.length+'</sub></div>'+
+    '<h2 class="title">'+(SESSION.score >= 8 ? "Sharp." : SESSION.score >= 5 ? "Solid." : "New seed at midnight.")+'</h2>'+
+    '<div class="body">Time: '+mm+
+    (prev && !better ? "<br>Today's best stands: "+prev.score+"/"+prev.total+"." : "")+
+    "<br>All-time best: "+best+"/10.<br>Same ten cards all day — fresh draw tomorrow.</div>"+
+    '<button class="abtn primary" id="sess-close2">Back to the feed</button></div>';
+  $("#sess-close2").addEventListener("click", closeSession);
+  $("#sess-prog").textContent = "done";
+}
+function closeSession(){
+  clearInterval(SESSION.timer);
+  SESSION.active = false;
+  $("#session").classList.remove("open");
+  $("#sess-slot").innerHTML = "";
+}
+$("#btn-session").addEventListener("click", startSession);
+$("#sess-close").addEventListener("click", closeSession);
 
 /* modal */
 function openModal(it){
@@ -929,6 +1124,8 @@ loadState(function(saved){
     if (!S.f || !Array.isArray(S.f.cats)) S.f = {cats:Object.keys(CATS), types:Object.keys(TYPES), diffs:[1,2,3], incMastered:false};
     S.f.cats = S.f.cats.filter(function(c){ return CATS[c]; });
     if (!S.f.cats.length) S.f.cats = Object.keys(CATS);
+    if (!S.acc) S.acc = {};
+    if (!S.sessions) S.sessions = [];
   }
   buildOrder();
   rebuildFeed();

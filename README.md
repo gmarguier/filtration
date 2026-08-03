@@ -1,10 +1,13 @@
 # Fₜ Filtration — ton feed quant
 
-Un mini-TikTok de révision pour entretiens quant : scroll vertical, ~230 cartes
-(probas, martingales & temps d'arrêt, calcul sto, brainteasers, questions type
-quantguide, finance/options, algo, stats, algèbre linéaire), réponses à révéler,
-listes « Review » / « Mastered », progression et streak — et **zéro répétition**
-tant que tu n'as pas tout vu.
+Un mini-TikTok de révision pour entretiens quant : scroll vertical, **309 cartes**
+(probas, martingales & temps d'arrêt, calcul sto, brainteasers + boss cards,
+questions type quantguide, finance/options, **marchés & market making**, algo,
+stats, **ML · GP · BayesOpt**, algèbre linéaire, boîte à outils math,
+**calcul mental**, **théorie de la mesure**), réponses à révéler, auto-évaluation
+✓/✗ avec précision par catégorie, **⚡ Daily Ten** chronométré, répétition espacée
+J+1 / J+3 / J+7, listes « Review » / « Mastered », progression et streak — et
+**zéro répétition** tant que tu n'as pas tout vu.
 
 *(Une filtration, c'est un flux d'information croissant. Ce feed est adapté à la tienne.)*
 
@@ -44,8 +47,15 @@ tant que tu n'as pas tout vu.
 - **Tap** sur le panneau givré : révèle la réponse.
 - **Double-tap** sur une carte : l'ajoute à la liste *Review* (✦).
 - Rail de droite : **Review** (bookmark) / **Got it** (maîtrisée → sort de la rotation).
+- Réponse révélée → **✗ Missed / ✓ Got it** : alimente ta **précision par catégorie**
+  (onglet Progression) et la répétition espacée.
+- **Répétition espacée** : une carte ratée (ou bookmarkée) revient **en tête de feed**
+  à J+1, puis J+3, puis J+7 ; trois réussites d'affilée → elle sort du cycle.
+- **⚡ Daily Ten** (éclair dans l'en-tête) : 10 questions chronométrées, même tirage
+  toute la journée (nouveau tirage à minuit), meilleur score du jour conservé.
 - En-tête : **Filtres** (catégories, type, difficulté, inclure les maîtrisées),
-  **Listes**, **Progression** (stats par catégorie, streak, export/import JSON).
+  **Listes**, **Progression** (stats + précision par catégorie, cartes dues,
+  Daily Ten, streak, export/import JSON).
 - Fin de cycle → carte **F∞** : re-mélanger, réinitialiser le « vu », ou changer de filtre.
 
 La progression est stockée **sur l'appareil** (localStorage). Pense à
@@ -64,7 +74,7 @@ Tout le contenu vit dans **`data.js`** — un simple tableau. Ajoute un objet :
  answer:"La réponse (uniquement pour type question)."}
 ```
 
-- `cat` : `probability · stochastic · stochcalc · brainteaser · quant · finance · algo · stats · linalg · math · meta`
+- `cat` : `probability · stochastic · stochcalc · brainteaser · quant · finance · markets · algo · stats · mlai · linalg · math · mental · measure · meta`
 - `type` : `concept` (affiché direct) · `question` (réponse à révéler) · `fact`
 - `diff` : 1 à 3 — `id` : libre mais unique.
 - LaTeX : **double backslash** (`\\mathbb{E}`), délimiteurs `\\( \\)` et `\\[ \\]`.
@@ -72,8 +82,18 @@ Tout le contenu vit dans **`data.js`** — un simple tableau. Ajoute un objet :
 
 ### Pages supplémentaires (carousel horizontal)
 
-Une carte peut avoir des pages swipeables vers la droite (dots sous le texte).
-Elles vivent dans `window.FEED_EXTRAS`, en bas de `data.js` :
+Une carte peut avoir des pages swipeables vers la droite (dots sous le texte) —
+parfait pour les dérivations et calculs détaillés. Deux façons :
+
+**1. Directement dans la carte** (recommandé — c'est ce que font les nouveaux packs) :
+
+```js
+{id:"perso02", cat:"markets", type:"concept", diff:2,
+ title:"…", body:"Page 1…",
+ pages:["**Détail** Page 2 avec le calcul…", "**Exemple** Page 3…"]}
+```
+
+**2. Via `window.FEED_EXTRAS`**, en bas de `data.js` :
 
 ```js
 window.FEED_EXTRAS = {
