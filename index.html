@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Filtration">
+<meta name="theme-color" content="#0B0E14">
+<meta name="description" content="A vertical feed of quant interview cards — probability, stochastic processes, brainteasers, finance, algorithms.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<title>Filtration — your quant feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+<style>
+:root{
+  --ink:#0B0E14; --ink2:#11151F; --ink3:#171C29;
+  --paper:#E9E4D8; --paper-dim:rgba(233,228,216,.62); --paper-faint:rgba(233,228,216,.38);
+  --line:rgba(233,228,216,.12);
+  --hue:#6EA8FF;
+  --rail-w:64px;
+  --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{
+  background:var(--ink); color:var(--paper);
+  font-family:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow:hidden; position:fixed; inset:0; width:100%;
+  touch-action:manipulation;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer}
+button:focus-visible,a:focus-visible{outline:2px solid var(--hue);outline-offset:2px;border-radius:8px}
+
+/* ---------- header ---------- */
+header{
+  position:fixed; top:0; left:0; right:0; z-index:30;
+  display:flex; align-items:center; gap:12px;
+  padding:calc(var(--safe-t) + 10px) 16px 10px;
+  background:linear-gradient(to bottom, rgba(11,14,20,.88), rgba(11,14,20,0));
+  pointer-events:none;
+}
+header > *{pointer-events:auto}
+.wordmark{display:flex;align-items:baseline;gap:8px;text-decoration:none;color:var(--paper)}
+.wordmark .ft{font-family:"Fraunces",Georgia,serif;font-style:italic;font-weight:600;font-size:21px;line-height:1}
+.wordmark .ft sub{font-size:12px;font-style:normal;color:var(--hue);transition:color .4s}
+.wordmark .name{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-dim)}
+.progress{
+  margin-left:auto; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:12px; color:var(--paper-dim); letter-spacing:.04em;
+  padding:5px 9px; border:1px solid var(--line); border-radius:999px;
+  background:rgba(11,14,20,.45); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.hbtns{display:flex;gap:6px}
+.hbtn{
+  width:40px;height:40px;border-radius:12px;display:grid;place-items:center;
+  color:var(--paper-dim); background:rgba(11,14,20,.45); border:1px solid var(--line);
+  backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px);
+}
+.hbtn:active{transform:scale(.94)}
+.hbtn svg{width:19px;height:19px}
+
+/* ---------- feed ---------- */
+#feed{
+  position:absolute; inset:0;
+  overflow-y:scroll; scroll-snap-type:y mandatory;
+  -webkit-overflow-scrolling:touch; overscroll-behavior-y:contain;
+  scrollbar-width:none;
+}
+#feed::-webkit-scrollbar{display:none}
+.card{
+  height:100vh; height:100dvh;
+  scroll-snap-align:start; scroll-snap-stop:always;
+  position:relative; overflow:hidden;
+}
+.glow{
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(120% 55% at 50% 108%, color-mix(in srgb, var(--hue) 26%, transparent), transparent 62%),
+    radial-gradient(70% 30% at 85% -6%, color-mix(in srgb, var(--hue) 10%, transparent), transparent 70%);
+  opacity:.9;
+}
+.card-inner{
+  position:relative; height:100%; width:100%; max-width:600px; margin:0 auto;
+  padding:calc(var(--safe-t) + 74px) 22px calc(var(--safe-b) + 46px) 22px;
+  padding-right:calc(22px + var(--rail-w));
+  display:flex; flex-direction:column; justify-content:center; gap:16px;
+  overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none;
+}
+.card-inner::-webkit-scrollbar{display:none}
+.card .meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:7px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--hue);
+}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--hue);box-shadow:0 0 10px var(--hue)}
+.badge{
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.14em;
+  color:var(--paper-faint); border:1px solid var(--line); border-radius:6px; padding:3px 7px;
+}
+.diff{margin-left:auto;display:flex;gap:3px}
+.diff i{width:12px;height:4px;border-radius:2px;background:var(--line)}
+.diff i.on{background:var(--hue)}
+h2.title{
+  font-family:"Fraunces",Georgia,serif;font-weight:600;
+  font-size:clamp(25px, 6.6vw, 33px); line-height:1.12; margin:0;
+  letter-spacing:-.01em; text-wrap:balance;
+}
+.body{font-size:16.5px;line-height:1.58;color:rgba(233,228,216,.92)}
+.body strong{font-weight:600;color:var(--paper)}
+.body code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em;background:rgba(233,228,216,.08);padding:1px 5px;border-radius:5px}
+.body .katex-display{margin:.55em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
+.body .katex{font-size:1.02em}
+
+/* entrance */
+.card .meta,.card h2.title,.card .body,.card .answer{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.card.active .meta{opacity:1;transform:none;transition-delay:.02s}
+.card.active h2.title{opacity:1;transform:none;transition-delay:.08s}
+.card.active .body{opacity:1;transform:none;transition-delay:.15s}
+.card.active .answer{opacity:1;transform:none;transition-delay:.22s}
+
+/* ---------- answer frost (signature) ---------- */
+.answer{position:relative;border-radius:16px;isolation:isolate}
+.answer .acontent{
+  position:relative; padding:16px 16px;
+  border:1px solid color-mix(in srgb, var(--hue) 30%, transparent);
+  border-radius:16px;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--hue) 9%, transparent), rgba(17,21,31,.35));
+  font-size:15.5px;line-height:1.56;color:rgba(233,228,216,.92);
+  filter:blur(15px) saturate(.8); opacity:.5;
+  transition:filter .45s ease,opacity .45s ease;
+  user-select:none;-webkit-user-select:none;
+}
+.answer .alabel{
+  position:absolute; inset:0; z-index:2;
+  display:flex; align-items:center; justify-content:center; gap:9px;
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--hue); border-radius:16px;
+  transition:opacity .3s ease;
+}
+.answer .alabel svg{width:15px;height:15px}
+.answer.revealed .acontent{filter:none;opacity:1;user-select:text;-webkit-user-select:text}
+.answer.revealed .alabel{opacity:0;pointer-events:none}
+.answer .acontent .katex-display{overflow-x:auto;overflow-y:hidden;margin:.5em 0}
+
+/* ---------- right rail ---------- */
+.rail{
+  position:absolute; right:10px; bottom:calc(var(--safe-b) + 40px); z-index:5;
+  display:flex; flex-direction:column; gap:16px; align-items:center; width:var(--rail-w);
+}
+.rbtn{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--paper-dim)}
+.rbtn .ring{
+  width:50px;height:50px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(233,228,216,.06); border:1px solid var(--line);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  transition:transform .15s ease, background .25s, border-color .25s, color .25s;
+}
+.rbtn:active .ring{transform:scale(.9)}
+.rbtn svg{width:21px;height:21px}
+.rbtn span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
+.rbtn.on{color:var(--hue)}
+.rbtn.on .ring{background:color-mix(in srgb, var(--hue) 18%, transparent);border-color:color-mix(in srgb, var(--hue) 60%, transparent);box-shadow:0 0 18px color-mix(in srgb, var(--hue) 35%, transparent)}
+
+/* double-tap burst */
+.burst{position:absolute;z-index:9;pointer-events:none;font-size:30px;color:var(--hue);
+  animation:burst .7s ease forwards;text-shadow:0 0 18px var(--hue)}
+@keyframes burst{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}25%{opacity:1}100%{transform:translate(-50%,-120%) scale(1.5);opacity:0}}
+
+/* swipe hint */
+.hint{
+  position:absolute;left:50%;bottom:calc(var(--safe-b) + 18px);transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--paper-faint);
+  font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+  animation:float 1.8s ease-in-out infinite; z-index:6;
+}
+@keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-7px)}}
+
+/* completion card */
+.done-card .card-inner{align-items:flex-start}
+.done-sym{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:52px;color:var(--hue);line-height:1}
+.done-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px}
+.abtn{
+  width:100%; padding:14px 16px; border-radius:14px; text-align:left; font-size:15px; font-weight:600;
+  border:1px solid var(--line); background:rgba(233,228,216,.05); color:var(--paper);
+}
+.abtn.primary{background:color-mix(in srgb, var(--hue) 20%, transparent);border-color:color-mix(in srgb, var(--hue) 55%, transparent)}
+.abtn:active{transform:scale(.98)}
+.abtn small{display:block;font-weight:400;color:var(--paper-dim);margin-top:2px;font-size:12.5px}
+
+/* ---------- sheets ---------- */
+.scrim{position:fixed;inset:0;background:rgba(4,6,10,.55);opacity:0;pointer-events:none;transition:opacity .3s;z-index:40}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{
+  position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:82dvh;
+  background:var(--ink2);border-radius:22px 22px 0 0;border-top:1px solid var(--line);
+  transform:translateY(105%);transition:transform .34s cubic-bezier(.32,.72,.28,1);
+  display:flex;flex-direction:column;
+}
+.sheet.open{transform:translateY(0)}
+.sheet .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:10px auto 2px}
+.sheet .shead{display:flex;align-items:center;justify-content:space-between;padding:8px 20px 10px}
+.sheet .shead h3{margin:0;font-family:"Fraunces",Georgia,serif;font-weight:600;font-size:20px}
+.sheet .close{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:rgba(233,228,216,.06);color:var(--paper-dim)}
+.sheet .sbody{overflow-y:auto;padding:4px 20px calc(var(--safe-b) + 22px);-webkit-overflow-scrolling:touch}
+.slabel{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--paper-faint);margin:16px 0 9px}
+.chiprow{display:flex;flex-wrap:wrap;gap:8px}
+.fchip{
+  padding:8px 13px;border-radius:999px;font-size:13.5px;font-weight:500;
+  border:1px solid var(--line);color:var(--paper-dim);background:rgba(233,228,216,.04);
+  display:inline-flex;align-items:center;gap:7px;
+}
+.fchip .cdot{width:7px;height:7px;border-radius:50%;background:var(--c,#888)}
+.fchip .n{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;color:var(--paper-faint)}
+.fchip.on{color:var(--paper);border-color:color-mix(in srgb, var(--c,#aaa) 65%, transparent);background:color-mix(in srgb, var(--c,#aaa) 14%, transparent)}
+.togglerow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line);margin-top:16px}
+.togglerow .tl{font-size:14.5px}
+.togglerow .tl small{display:block;color:var(--paper-faint);font-size:12px;margin-top:1px}
+.switch{width:48px;height:29px;border-radius:999px;background:rgba(233,228,216,.12);position:relative;transition:background .25s;flex-shrink:0}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:23px;height:23px;border-radius:50%;background:var(--paper);transition:transform .25s}
+.switch.on{background:var(--hue)}
+.switch.on::after{transform:translateX(19px)}
+.applybtn{
+  margin-top:20px;width:100%;padding:15px;border-radius:14px;font-size:15.5px;font-weight:600;
+  background:var(--paper);color:var(--ink);
+}
+.applybtn:active{transform:scale(.98)}
+
+/* lists */
+.tabs{display:flex;gap:6px;padding:0 20px 8px}
+.tab{flex:1;padding:9px;border-radius:11px;font-size:13.5px;font-weight:600;color:var(--paper-dim);background:rgba(233,228,216,.05);border:1px solid transparent}
+.tab.on{color:var(--paper);border-color:var(--line);background:rgba(233,228,216,.1)}
+.lrow{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:13px 2px;border-bottom:1px solid var(--line)}
+.lrow .ldot{width:8px;height:8px;border-radius:50%;background:var(--c);flex-shrink:0;box-shadow:0 0 8px var(--c)}
+.lrow .lmain{flex:1;min-width:0}
+.lrow .lt{font-size:14.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lrow .lc{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-faint);margin-top:2px}
+.lrow .lx{color:var(--paper-faint);padding:8px}
+.empty{padding:34px 10px;text-align:center;color:var(--paper-faint);font-size:14px;line-height:1.6}
+.empty b{color:var(--paper-dim)}
+
+/* stats */
+.statgrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-top:4px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:12px 12px;background:rgba(233,228,216,.03)}
+.stat .v{font-family:"Fraunces",Georgia,serif;font-size:24px;font-weight:600}
+.stat .k{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--paper-faint);margin-top:3px}
+.cbar{margin:11px 0}
+.cbar .ct{display:flex;justify-content:space-between;font-size:12.5px;color:var(--paper-dim);margin-bottom:5px}
+.cbar .ct b{color:var(--c);font-weight:600}
+.cbar .track{height:6px;border-radius:3px;background:rgba(233,228,216,.08);overflow:hidden}
+.cbar .fill{height:100%;border-radius:3px;background:var(--c);box-shadow:0 0 10px color-mix(in srgb, var(--c) 55%, transparent)}
+.dangerzone{margin-top:20px;display:flex;flex-direction:column;gap:9px}
+.gbtn{width:100%;padding:12px;border-radius:12px;font-size:14px;font-weight:500;border:1px solid var(--line);background:rgba(233,228,216,.05);color:var(--paper)}
+.gbtn.danger{color:#FF8A8A;border-color:rgba(255,138,138,.3)}
+
+/* modal single card */
+#modal{position:fixed;inset:0;z-index:50;background:var(--ink);display:none}
+#modal.open{display:block}
+#modal .mclose{position:absolute;top:calc(var(--safe-t) + 12px);right:14px;z-index:8;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:rgba(233,228,216,.08);border:1px solid var(--line);color:var(--paper)}
+#modal .card{height:100%}
+
+/* toast */
+#toast{
+  position:fixed;left:50%;bottom:calc(var(--safe-b) + 26px);transform:translateX(-50%) translateY(16px);
+  z-index:60;background:var(--ink3);border:1px solid var(--line);color:var(--paper);
+  padding:10px 16px;border-radius:999px;font-size:13.5px;opacity:0;pointer-events:none;
+  transition:opacity .25s,transform .25s;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,.4);
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header>
+  <a class="wordmark" href="#" onclick="return false">
+    <span class="ft">F<sub id="wm-sub">t</sub></span>
+    <span class="name">Filtration</span>
+  </a>
+  <div class="progress" id="progress">–</div>
+  <div class="hbtns">
+    <button class="hbtn" id="btn-filter" aria-label="Filters">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+    </button>
+    <button class="hbtn" id="btn-lists" aria-label="Saved lists">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg>
+    </button>
+    <button class="hbtn" id="btn-stats" aria-label="Progress">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="feed" aria-label="Card feed"></main>
+
+<div class="scrim" id="scrim"></div>
+
+<section class="sheet" id="sheet-filter" aria-label="Filters">
+  <div class="grab"></div>
+  <div class="shead"><h3>Filters</h3><button class="close" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="slabel">Categories</div>
+    <div class="chiprow" id="f-cats"></div>
+    <div class="slabel">Card type</div>
+    <div class="chiprow" id="f-types"></div>
+    <div class="slabel">Difficulty</div>
+    <div class="chiprow" id="f-diffs"></div>
+    <div class="togglerow">
+      <div class="tl">Include mastered cards<small>Off keeps your feed focused on what is left.</small></div>
+      <button class="switch" id="f-mastered" role="switch" aria-checked="false" aria-label="Include mastered cards"></button>
+    </div>
+    <button class="applybtn" id="f-apply">Apply & reshuffle</button>
+  </div>
+</section>
+
+<section class="sheet" id="sheet-lists" aria-label="Saved lists">
+  <div class="grab"></div>
+  <div class="shead"><h3>Your lists</h3><button class="close" data-close>✕</button></div>
+  <div class="tabs">
+    <button class="tab on" data-tab="review">Review <span id="n-review"></span></button>
+    <button class="tab" data-tab="mastered">Mastered <span id="n-mastered"></span></button>
+  </div>
+  <div class="sbody" id="lists-body"></div>
+</section>
+
+<section class="sheet" id="sheet-stats" aria-label="Progress">
+  <div class="grab"></div>
+  <div class="shead"><h3>Progress</h3><button class="close" data-close>✕</button></div>
+  <div class="sbody">
+    <div class="statgrid">
+      <div class="stat"><div class="v" id="s-seen">0</div><div class="k">Seen</div></div>
+      <div class="stat"><div class="v" id="s-mastered">0</div><div class="k">Mastered</div></div>
+      <div class="stat"><div class="v" id="s-streak">0</div><div class="k">Day streak</div></div>
+    </div>
+    <div class="slabel">By category</div>
+    <div id="s-cats"></div>
+    <div class="dangerzone">
+      <button class="gbtn" id="s-export">Export progress (copy JSON)</button>
+      <button class="gbtn" id="s-import">Import progress (paste JSON)</button>
+      <button class="gbtn danger" id="s-resetseen">Reset seen history</button>
+      <button class="gbtn danger" id="s-wipe">Erase everything</button>
+    </div>
+  </div>
+</section>
+
+<div id="modal"><button class="mclose" id="modal-close" aria-label="Close">✕</button><div id="modal-slot"></div></div>
+<div id="toast" role="status"></div>
+
+<script src="data.js"></script>
+<script id="app">
+(function(){
+"use strict";
+
+/* ---------- constants ---------- */
+var CATS = {
+  probability:  {label:"Probability",        color:"#6EA8FF"},
+  stochastic:   {label:"Stochastic Processes",color:"#A78BFF"},
+  stochcalc:    {label:"Stochastic Calculus", color:"#FF8FB8"},
+  brainteaser:  {label:"Brainteasers",        color:"#FF9E64"},
+  quant:        {label:"Quant Questions",     color:"#53DDAF"},
+  finance:      {label:"Finance & Options",   color:"#E9C46A"},
+  algo:         {label:"Algorithms & CS",     color:"#5CD6E0"},
+  stats:        {label:"Statistics & ML",     color:"#C0E863"},
+  linalg:       {label:"Linear Algebra",      color:"#E4626F"},
+  math:         {label:"Math Toolkit",        color:"#EFE6C0"},
+  meta:         {label:"Interview Craft",     color:"#9AA3B2"}
+};
+var TYPES = {concept:"Concept", question:"Question", fact:"Fact"};
+var ITEMS = (window.FEED_ITEMS||[]).filter(function(it){return CATS[it.cat];});
+var byId = {}; ITEMS.forEach(function(it){ byId[it.id]=it; });
+var KOPTS = {delimiters:[
+  {left:"\\(", right:"\\)", display:false},
+  {left:"\\[", right:"\\]", display:true}
+], throwOnError:false};
+
+/* ---------- storage ---------- */
+var SKEY = "filtration:v1";
+var saveTimer = null;
+function persist(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(function(){
+    var json = JSON.stringify(S);
+    if (window.storage && window.storage.set){
+      try { window.storage.set(SKEY, json); } catch(e){}
+    } else {
+      try { localStorage.setItem(SKEY, json); } catch(e){}
+    }
+  }, 250);
+}
+function loadState(cb){
+  var fallback = function(){
+    try { var raw = localStorage.getItem(SKEY); cb(raw ? JSON.parse(raw) : null); }
+    catch(e){ cb(null); }
+  };
+  if (window.storage && window.storage.get){
+    try {
+      Promise.resolve(window.storage.get(SKEY)).then(function(r){
+        if (r && r.value) cb(JSON.parse(r.value)); else cb(null);
+      }).catch(fallback);
+    } catch(e){ fallback(); }
+  } else fallback();
+}
+
+/* ---------- state ---------- */
+var S = {
+  seen:{}, review:{}, mastered:{},
+  f:{cats:Object.keys(CATS), types:["concept","question","fact"], diffs:[1,2,3], incMastered:false},
+  streak:0, lastDay:null
+};
+var order = [];        // ids for current cycle
+var rendered = 0;      // cards appended so far
+var revisit = false;   // true when re-scrolling seen cards
+var hinted = false;
+
+/* ---------- helpers ---------- */
+function $(s,el){ return (el||document).querySelector(s); }
+function $$(s,el){ return Array.prototype.slice.call((el||document).querySelectorAll(s)); }
+function shuffle(a){
+  a = a.slice();
+  for (var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function fmt(s){
+  return esc(s)
+    .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+    .replace(/`([^`]+)`/g,"<code>$1</code>")
+    .replace(/\n/g,"<br>");
+}
+var mathQueue = [];
+function renderMath(el){
+  if (window.renderMathInElement){ try{ renderMathInElement(el, KOPTS); }catch(e){} }
+  else mathQueue.push(el);
+}
+window.addEventListener("load", function(){
+  var q = mathQueue.splice(0); q.forEach(renderMath);
+});
+function toast(msg){
+  var t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(function(){ t.classList.remove("show"); }, 1600);
+}
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function bumpStreak(){
+  var today = todayStr();
+  if (S.lastDay === today) return;
+  var y = new Date(); y.setDate(y.getDate()-1);
+  S.streak = (S.lastDay === y.toISOString().slice(0,10)) ? (S.streak||0)+1 : 1;
+  S.lastDay = today;
+}
+
+/* ---------- pool & order ---------- */
+function currentPool(){
+  return ITEMS.filter(function(it){
+    return S.f.cats.indexOf(it.cat) >= 0
+      && S.f.types.indexOf(it.type) >= 0
+      && S.f.diffs.indexOf(it.diff) >= 0
+      && (S.f.incMastered || !S.mastered[it.id]);
+  });
+}
+function buildOrder(){
+  var pool = currentPool();
+  var unseen = pool.filter(function(it){ return !S.seen[it.id]; }).map(function(it){ return it.id; });
+  revisit = false;
+  order = shuffle(unseen);
+}
+function poolCounts(){
+  var pool = currentPool();
+  var seen = pool.filter(function(it){ return S.seen[it.id]; }).length;
+  return {seen:seen, total:pool.length};
+}
+function updateProgress(){
+  var c = poolCounts();
+  $("#progress").textContent = c.seen + " / " + c.total;
+}
+
+/* ---------- card rendering ---------- */
+function cardHTML(it){
+  var cat = CATS[it.cat];
+  var ticks = "";
+  for (var d=1; d<=3; d++) ticks += '<i class="'+(d<=it.diff?"on":"")+'"></i>';
+  var h = '';
+  h += '<div class="glow"></div>';
+  h += '<div class="card-inner">';
+  h += '<div class="meta"><span class="chip"><span class="dot"></span>'+cat.label+'</span>';
+  h += '<span class="badge">'+TYPES[it.type]+'</span>';
+  h += '<span class="diff" aria-label="difficulty '+it.diff+' of 3">'+ticks+'</span></div>';
+  h += '<h2 class="title">'+fmt(it.title)+'</h2>';
+  h += '<div class="body">'+fmt(it.body)+'</div>';
+  if (it.answer){
+    h += '<div class="answer" role="button" tabindex="0" aria-label="Reveal answer">';
+    h += '<div class="acontent">'+fmt(it.answer)+'</div>';
+    h += '<div class="alabel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="3.2"/><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/></svg>Tap to reveal</div>';
+    h += '</div>';
+  }
+  h += '</div>';
+  h += railHTML(it);
+  return h;
+}
+function railHTML(it){
+  var saved = !!S.review[it.id], done = !!S.mastered[it.id];
+  var h = '<div class="rail">';
+  h += '<button class="rbtn rb-save'+(saved?" on":"")+'" data-act="save" aria-pressed="'+saved+'">'
+     + '<span class="ring"><svg viewBox="0 0 24 24" fill="'+(saved?"currentColor":"none")+'" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 3h12v18l-6-4.5L6 21z"/></svg></span>'
+     + '<span>Review</span></button>';
+  h += '<button class="rbtn rb-done'+(done?" on":"")+'" data-act="done" aria-pressed="'+done+'">'
+     + '<span class="ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg></span>'
+     + '<span>Got it</span></button>';
+  h += '</div>';
+  return h;
+}
+function makeCard(it, inModal){
+  var el = document.createElement("article");
+  el.className = "card";
+  el.dataset.id = it.id;
+  el.style.setProperty("--hue", CATS[it.cat].color);
+  el.innerHTML = cardHTML(it);
+  renderMath(el);
+
+  var ans = $(".answer", el);
+  if (ans){
+    var reveal = function(){ ans.classList.add("revealed"); };
+    ans.addEventListener("click", reveal);
+    ans.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); reveal(); } });
+  }
+  $$(".rbtn", el).forEach(function(b){
+    b.addEventListener("click", function(e){
+      e.stopPropagation();
+      if (b.dataset.act === "save") toggleReview(it.id);
+      else toggleMastered(it.id);
+    });
+  });
+
+  /* double-tap anywhere on the card body = save for review */
+  var lastTap = 0;
+  $(".card-inner", el).addEventListener("pointerup", function(e){
+    if (e.target.closest(".rbtn") || e.target.closest(".answer")) return;
+    var now = Date.now();
+    if (now - lastTap < 320){
+      if (!S.review[it.id]) toggleReview(it.id);
+      var star = document.createElement("div");
+      star.className = "burst"; star.textContent = "✦";
+      star.style.left = e.clientX+"px"; star.style.top = e.clientY+"px";
+      document.body.appendChild(star);
+      setTimeout(function(){ star.remove(); }, 750);
+      lastTap = 0;
+    } else lastTap = now;
+  });
+
+  if (!inModal){
+    io.observe(el);
+    seenIO.observe(el);
+  } else {
+    requestAnimationFrame(function(){ el.classList.add("active"); });
+  }
+  return el;
+}
+function completionCard(){
+  var el = document.createElement("article");
+  el.className = "card done-card";
+  el.style.setProperty("--hue", "#6EA8FF");
+  var c = poolCounts();
+  el.innerHTML =
+    '<div class="glow"></div>'+
+    '<div class="card-inner">'+
+    '<div class="done-sym">F<sub>∞</sub></div>'+
+    '<h2 class="title">Filtration complete.</h2>'+
+    '<div class="body">Every card in this filter has crossed your feed — '+c.total+' of them. Nothing repeated. What next?</div>'+
+    '<div class="done-actions">'+
+    '<button class="abtn primary" data-done="revisit">Shuffle everything again<small>Re-scroll all '+c.total+' cards, stats untouched.</small></button>'+
+    '<button class="abtn" data-done="resetseen">Reset seen history<small>Start a fresh cycle from zero.</small></button>'+
+    '<button class="abtn" data-done="filters">Adjust filters<small>Open a new slice of the deck.</small></button>'+
+    '</div></div>';
+  $$("[data-done]", el).forEach(function(b){
+    b.addEventListener("click", function(){
+      var a = b.dataset.done;
+      if (a === "revisit"){
+        revisit = true;
+        order = shuffle(currentPool().map(function(it){ return it.id; }));
+        rebuildFeed();
+      } else if (a === "resetseen"){
+        currentPool().forEach(function(it){ delete S.seen[it.id]; });
+        persist(); buildOrder(); rebuildFeed(); updateProgress();
+        toast("Seen history reset");
+      } else openSheet("filter");
+    });
+  });
+  io.observe(el);
+  return el;
+}
+
+/* ---------- feed ---------- */
+var feed = $("#feed");
+var BATCH = 6;
+var doneAppended = false;
+function renderMore(){
+  var frag = document.createDocumentFragment();
+  var n = 0;
+  while (rendered < order.length && n < BATCH){
+    var it = byId[order[rendered]];
+    if (it) frag.appendChild(makeCard(it));
+    rendered++; n++;
+  }
+  if (rendered >= order.length && !doneAppended){
+    frag.appendChild(completionCard());
+    doneAppended = true;
+  }
+  feed.appendChild(frag);
+}
+function rebuildFeed(){
+  feed.innerHTML = "";
+  rendered = 0; doneAppended = false;
+  feed.scrollTop = 0;
+  renderMore();
+  addHintIfNeeded();
+}
+function addHintIfNeeded(){
+  if (hinted) return;
+  var first = feed.firstElementChild;
+  if (!first) return;
+  var hint = document.createElement("div");
+  hint.className = "hint";
+  hint.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>Swipe up';
+  first.appendChild(hint);
+  var once = function(){ hinted = true; hint.remove(); feed.removeEventListener("scroll", once); };
+  feed.addEventListener("scroll", once, {passive:true});
+}
+
+/* activate + lazy-load observer */
+var io = new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if (en.isIntersecting){
+      en.target.classList.add("active");
+      var idx = Array.prototype.indexOf.call(feed.children, en.target);
+      if (idx >= rendered - 3) renderMore();
+    }
+  });
+}, {root:feed, threshold:0.35});
+
+/* seen-marking observer: 65% visible for 700ms */
+var seenIO = new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    var el = en.target, id = el.dataset.id;
+    if (!id) return;
+    if (en.intersectionRatio >= 0.65){
+      el._t = setTimeout(function(){ markSeen(id); }, 700);
+    } else if (el._t){
+      clearTimeout(el._t); el._t = null;
+    }
+  });
+}, {root:feed, threshold:[0.65]});
+
+function markSeen(id){
+  if (S.seen[id]) return;
+  S.seen[id] = Date.now();
+  bumpStreak();
+  persist(); updateProgress();
+}
+
+/* ---------- actions ---------- */
+function syncRails(id){
+  $$('.card[data-id="'+id+'"]').forEach(function(el){
+    var s = $(".rb-save", el), d = $(".rb-done", el);
+    if (s){ s.classList.toggle("on", !!S.review[id]); s.setAttribute("aria-pressed", !!S.review[id]);
+      $("svg", s).setAttribute("fill", S.review[id] ? "currentColor" : "none"); }
+    if (d){ d.classList.toggle("on", !!S.mastered[id]); d.setAttribute("aria-pressed", !!S.mastered[id]); }
+  });
+}
+function toggleReview(id){
+  if (S.review[id]) { delete S.review[id]; toast("Removed from Review"); }
+  else { S.review[id] = Date.now(); toast("Saved to Review"); }
+  persist(); syncRails(id); refreshListCounts();
+}
+function toggleMastered(id){
+  if (S.mastered[id]) { delete S.mastered[id]; toast("Back in rotation"); }
+  else { S.mastered[id] = Date.now(); S.seen[id] = S.seen[id] || Date.now(); toast("Mastered ✓"); }
+  persist(); syncRails(id); refreshListCounts(); updateProgress();
+}
+
+/* ---------- sheets ---------- */
+var scrim = $("#scrim");
+var sheets = {filter:$("#sheet-filter"), lists:$("#sheet-lists"), stats:$("#sheet-stats")};
+function openSheet(name){
+  closeSheets();
+  scrim.classList.add("open");
+  sheets[name].classList.add("open");
+  if (name === "lists") renderLists();
+  if (name === "stats") renderStats();
+  if (name === "filter") renderFilter();
+}
+function closeSheets(){
+  scrim.classList.remove("open");
+  Object.keys(sheets).forEach(function(k){ sheets[k].classList.remove("open"); });
+}
+scrim.addEventListener("click", closeSheets);
+$$("[data-close]").forEach(function(b){ b.addEventListener("click", closeSheets); });
+$("#btn-filter").addEventListener("click", function(){ openSheet("filter"); });
+$("#btn-lists").addEventListener("click", function(){ openSheet("lists"); });
+$("#btn-stats").addEventListener("click", function(){ openSheet("stats"); });
+
+/* filter sheet */
+var draft = null;
+function renderFilter(){
+  draft = JSON.parse(JSON.stringify(S.f));
+  var catBox = $("#f-cats"); catBox.innerHTML = "";
+  Object.keys(CATS).forEach(function(k){
+    var count = ITEMS.filter(function(it){ return it.cat===k; }).length;
+    var b = document.createElement("button");
+    b.className = "fchip" + (draft.cats.indexOf(k)>=0 ? " on":"");
+    b.style.setProperty("--c", CATS[k].color);
+    b.innerHTML = '<span class="cdot"></span>'+CATS[k].label+' <span class="n">'+count+'</span>';
+    b.addEventListener("click", function(){
+      var i = draft.cats.indexOf(k);
+      if (i>=0) draft.cats.splice(i,1); else draft.cats.push(k);
+      b.classList.toggle("on");
+    });
+    catBox.appendChild(b);
+  });
+  var typeBox = $("#f-types"); typeBox.innerHTML = "";
+  Object.keys(TYPES).forEach(function(k){
+    var b = document.createElement("button");
+    b.className = "fchip" + (draft.types.indexOf(k)>=0 ? " on":"");
+    b.style.setProperty("--c", "#E9E4D8");
+    b.textContent = TYPES[k];
+    b.addEventListener("click", function(){
+      var i = draft.types.indexOf(k);
+      if (i>=0) draft.types.splice(i,1); else draft.types.push(k);
+      b.classList.toggle("on");
+    });
+    typeBox.appendChild(b);
+  });
+  var diffBox = $("#f-diffs"); diffBox.innerHTML = "";
+  [1,2,3].forEach(function(d){
+    var b = document.createElement("button");
+    b.className = "fchip" + (draft.diffs.indexOf(d)>=0 ? " on":"");
+    b.style.setProperty("--c", "#E9E4D8");
+    b.textContent = d===1 ? "● Warm-up" : d===2 ? "●● Core" : "●●● Hard";
+    b.addEventListener("click", function(){
+      var i = draft.diffs.indexOf(d);
+      if (i>=0) draft.diffs.splice(i,1); else draft.diffs.push(d);
+      b.classList.toggle("on");
+    });
+    diffBox.appendChild(b);
+  });
+  var sw = $("#f-mastered");
+  sw.classList.toggle("on", draft.incMastered);
+  sw.setAttribute("aria-checked", draft.incMastered);
+  sw.onclick = function(){
+    draft.incMastered = !draft.incMastered;
+    sw.classList.toggle("on", draft.incMastered);
+    sw.setAttribute("aria-checked", draft.incMastered);
+  };
+}
+$("#f-apply").addEventListener("click", function(){
+  if (!draft.cats.length){ toast("Pick at least one category"); return; }
+  if (!draft.types.length){ toast("Pick at least one card type"); return; }
+  if (!draft.diffs.length){ toast("Pick at least one difficulty"); return; }
+  S.f = draft; persist();
+  buildOrder(); rebuildFeed(); updateProgress();
+  closeSheets();
+});
+
+/* lists sheet */
+var listTab = "review";
+$$(".tab").forEach(function(t){
+  t.addEventListener("click", function(){
+    $$(".tab").forEach(function(x){ x.classList.remove("on"); });
+    t.classList.add("on"); listTab = t.dataset.tab; renderLists();
+  });
+});
+function refreshListCounts(){
+  $("#n-review").textContent = "· " + Object.keys(S.review).length;
+  $("#n-mastered").textContent = "· " + Object.keys(S.mastered).length;
+}
+function renderLists(){
+  refreshListCounts();
+  var box = $("#lists-body"); box.innerHTML = "";
+  var src = listTab === "review" ? S.review : S.mastered;
+  var ids = Object.keys(src).sort(function(a,b){ return src[b]-src[a]; });
+  if (!ids.length){
+    box.innerHTML = '<div class="empty">' + (listTab==="review"
+      ? 'Nothing saved yet.<br><b>Tap the bookmark</b> on any card — or double-tap the card itself.'
+      : 'No mastered cards yet.<br>Hit <b>Got it</b> when a card holds no secrets for you.') + '</div>';
+    return;
+  }
+  ids.forEach(function(id){
+    var it = byId[id]; if (!it) return;
+    var row = document.createElement("div");
+    row.className = "lrow";
+    row.style.setProperty("--c", CATS[it.cat].color);
+    row.innerHTML = '<span class="ldot"></span><button class="lmain"><div class="lt">'+esc(it.title)+'</div><div class="lc">'+CATS[it.cat].label+'</div></button><button class="lx" aria-label="Remove">✕</button>';
+    $(".lmain", row).addEventListener("click", function(){ openModal(it); });
+    $(".lx", row).addEventListener("click", function(){
+      if (listTab==="review") toggleReview(id); else toggleMastered(id);
+      renderLists();
+    });
+    box.appendChild(row);
+  });
+}
+
+/* stats sheet */
+function renderStats(){
+  var seenN = Object.keys(S.seen).filter(function(id){ return byId[id]; }).length;
+  $("#s-seen").textContent = seenN + "/" + ITEMS.length;
+  $("#s-mastered").textContent = Object.keys(S.mastered).length;
+  $("#s-streak").textContent = (S.streak||0);
+  var box = $("#s-cats"); box.innerHTML = "";
+  Object.keys(CATS).forEach(function(k){
+    var all = ITEMS.filter(function(it){ return it.cat===k; });
+    if (!all.length) return;
+    var seen = all.filter(function(it){ return S.seen[it.id]; }).length;
+    var row = document.createElement("div");
+    row.className = "cbar"; row.style.setProperty("--c", CATS[k].color);
+    row.innerHTML = '<div class="ct"><b>'+CATS[k].label+'</b><span>'+seen+' / '+all.length+'</span></div>'
+      + '<div class="track"><div class="fill" style="width:'+(all.length?Math.round(100*seen/all.length):0)+'%"></div></div>';
+    box.appendChild(row);
+  });
+}
+$("#s-export").addEventListener("click", function(){
+  var json = JSON.stringify(S);
+  var done = function(){ toast("Progress copied — keep it somewhere safe"); };
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(json).then(done, function(){ window.prompt("Copy your progress JSON:", json); });
+  } else window.prompt("Copy your progress JSON:", json);
+});
+$("#s-import").addEventListener("click", function(){
+  var raw = window.prompt("Paste your progress JSON:");
+  if (!raw) return;
+  try {
+    var d = JSON.parse(raw);
+    if (!d || typeof d !== "object" || !d.seen) throw 0;
+    S = Object.assign(S, d);
+    persist(); buildOrder(); rebuildFeed(); updateProgress(); renderStats(); refreshListCounts();
+    toast("Progress imported");
+  } catch(e){ toast("That JSON did not parse"); }
+});
+$("#s-resetseen").addEventListener("click", function(){
+  if (!confirm("Reset seen history? Lists and mastery are kept.")) return;
+  S.seen = {}; persist(); buildOrder(); rebuildFeed(); updateProgress(); renderStats();
+  toast("Fresh cycle started");
+});
+$("#s-wipe").addEventListener("click", function(){
+  if (!confirm("Erase ALL progress — seen, lists, mastery, streak?")) return;
+  S = {seen:{}, review:{}, mastered:{}, f:{cats:Object.keys(CATS), types:Object.keys(TYPES), diffs:[1,2,3], incMastered:false}, streak:0, lastDay:null};
+  persist(); buildOrder(); rebuildFeed(); updateProgress(); renderStats(); refreshListCounts();
+  toast("Clean slate");
+});
+
+/* modal */
+function openModal(it){
+  var slot = $("#modal-slot"); slot.innerHTML = "";
+  slot.appendChild(makeCard(it, true));
+  $("#modal").classList.add("open");
+}
+$("#modal-close").addEventListener("click", function(){
+  $("#modal").classList.remove("open");
+  $("#modal-slot").innerHTML = "";
+});
+
+/* header wordmark sub follows current card hue */
+var hueWatch = new IntersectionObserver(function(entries){
+  entries.forEach(function(en){
+    if (en.isIntersecting && en.intersectionRatio > 0.6){
+      var c = getComputedStyle(en.target).getPropertyValue("--hue");
+      if (c) $("#wm-sub").style.color = c.trim();
+    }
+  });
+}, {root:feed, threshold:[0.6]});
+new MutationObserver(function(muts){
+  muts.forEach(function(m){
+    Array.prototype.forEach.call(m.addedNodes, function(n){
+      if (n.nodeType===1 && n.classList.contains("card")) hueWatch.observe(n);
+    });
+  });
+}).observe(feed, {childList:true});
+
+/* ---------- boot ---------- */
+loadState(function(saved){
+  if (saved){
+    S = Object.assign(S, saved);
+    if (!S.f || !Array.isArray(S.f.cats)) S.f = {cats:Object.keys(CATS), types:Object.keys(TYPES), diffs:[1,2,3], incMastered:false};
+    S.f.cats = S.f.cats.filter(function(c){ return CATS[c]; });
+    if (!S.f.cats.length) S.f.cats = Object.keys(CATS);
+  }
+  buildOrder();
+  rebuildFeed();
+  updateProgress();
+  refreshListCounts();
+});
+
+/* service worker (skipped on file:// and in sandboxed previews) */
+try {
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  }
+} catch(e){}
+})();
+</script>
+</body>
+</html>
