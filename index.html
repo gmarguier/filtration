@@ -25,7 +25,7 @@
   --paper:#E9E4D8; --paper-dim:rgba(233,228,216,.62); --paper-faint:rgba(233,228,216,.38);
   --line:rgba(233,228,216,.12);
   --hue:#6EA8FF;
-  --rail-w:64px;
+  --rail-w:52px;
   --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -90,9 +90,9 @@ header > *{pointer-events:auto}
 }
 .card-inner{
   position:relative; height:100%; width:100%; max-width:600px; margin:0 auto;
-  padding:calc(var(--safe-t) + 74px) 22px calc(var(--safe-b) + 46px) 22px;
-  padding-right:calc(22px + var(--rail-w));
-  display:flex; flex-direction:column; justify-content:center; gap:16px;
+  padding:calc(var(--safe-t) + 60px) 18px calc(var(--safe-b) + 34px) 18px;
+  padding-right:calc(12px + var(--rail-w));
+  display:flex; flex-direction:column; justify-content:flex-start; gap:13px;
   overflow-y:auto; overscroll-behavior:contain; scrollbar-width:none;
 }
 .card-inner::-webkit-scrollbar{display:none}
@@ -120,6 +120,20 @@ h2.title{
 .body code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em;background:rgba(233,228,216,.08);padding:1px 5px;border-radius:5px}
 .body .katex-display{margin:.55em 0;overflow-x:auto;overflow-y:hidden;padding:2px 0}
 .body .katex{font-size:1.02em}
+
+/* ---------- pager: horizontal pages inside a card ---------- */
+.pager{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+  -webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+.pager::-webkit-scrollbar{display:none}
+.pager .page{flex:0 0 100%;min-width:100%;scroll-snap-align:start;scroll-snap-stop:always;padding-right:10px}
+.pdots{display:flex;gap:6px;align-items:center}
+.pdots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:background .2s,transform .2s}
+.pdots i.on{background:var(--hue);transform:scale(1.2)}
+.pdots .plabel{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--paper-faint);margin-left:7px;transition:opacity .4s}
+.card .pager,.card .pdots{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
+.card.active .pager{opacity:1;transform:none;transition-delay:.15s}
+.card.active .pdots{opacity:1;transform:none;transition-delay:.2s}
 
 /* entrance */
 .card .meta,.card h2.title,.card .body,.card .answer{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .5s ease}
@@ -154,18 +168,18 @@ h2.title{
 
 /* ---------- right rail ---------- */
 .rail{
-  position:absolute; right:10px; bottom:calc(var(--safe-b) + 40px); z-index:5;
-  display:flex; flex-direction:column; gap:16px; align-items:center; width:var(--rail-w);
+  position:absolute; right:6px; bottom:calc(var(--safe-b) + 34px); z-index:5;
+  display:flex; flex-direction:column; gap:14px; align-items:center; width:var(--rail-w);
 }
 .rbtn{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--paper-dim)}
 .rbtn .ring{
-  width:50px;height:50px;border-radius:50%;display:grid;place-items:center;
+  width:46px;height:46px;border-radius:50%;display:grid;place-items:center;
   background:rgba(233,228,216,.06); border:1px solid var(--line);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
   transition:transform .15s ease, background .25s, border-color .25s, color .25s;
 }
 .rbtn:active .ring{transform:scale(.9)}
-.rbtn svg{width:21px;height:21px}
+.rbtn svg{width:19px;height:19px}
 .rbtn span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase}
 .rbtn.on{color:var(--hue)}
 .rbtn.on .ring{background:color-mix(in srgb, var(--hue) 18%, transparent);border-color:color-mix(in srgb, var(--hue) 60%, transparent);box-shadow:0 0 18px color-mix(in srgb, var(--hue) 35%, transparent)}
@@ -185,7 +199,7 @@ h2.title{
 @keyframes float{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(-7px)}}
 
 /* completion card */
-.done-card .card-inner{align-items:flex-start}
+.done-card .card-inner{align-items:flex-start;justify-content:center}
 .done-sym{font-family:"Fraunces",Georgia,serif;font-style:italic;font-size:52px;color:var(--hue);line-height:1}
 .done-actions{display:flex;flex-direction:column;gap:10px;width:100%;margin-top:6px}
 .abtn{
@@ -378,6 +392,8 @@ var CATS = {
 var TYPES = {concept:"Concept", question:"Question", fact:"Fact"};
 var ITEMS = (window.FEED_ITEMS||[]).filter(function(it){return CATS[it.cat];});
 var byId = {}; ITEMS.forEach(function(it){ byId[it.id]=it; });
+var EXTRAS = window.FEED_EXTRAS || {};
+ITEMS.forEach(function(it){ if (EXTRAS[it.id] && EXTRAS[it.id].length) it.pages = EXTRAS[it.id]; });
 var KOPTS = {delimiters:[
   {left:"\\(", right:"\\)", display:false},
   {left:"\\[", right:"\\]", display:true}
@@ -495,7 +511,16 @@ function cardHTML(it){
   h += '<span class="badge">'+TYPES[it.type]+'</span>';
   h += '<span class="diff" aria-label="difficulty '+it.diff+' of 3">'+ticks+'</span></div>';
   h += '<h2 class="title">'+fmt(it.title)+'</h2>';
-  h += '<div class="body">'+fmt(it.body)+'</div>';
+  var pages = [it.body].concat(it.pages || []);
+  if (pages.length > 1){
+    h += '<div class="pager">';
+    for (var pi = 0; pi < pages.length; pi++) h += '<div class="page"><div class="body">'+fmt(pages[pi])+'</div></div>';
+    h += '</div><div class="pdots">';
+    for (var di = 0; di < pages.length; di++) h += '<i class="'+(di===0?"on":"")+'"></i>';
+    h += '<span class="plabel">swipe &#8250;</span></div>';
+  } else {
+    h += '<div class="body">'+fmt(it.body)+'</div>';
+  }
   if (it.answer){
     h += '<div class="answer" role="button" tabindex="0" aria-label="Reveal answer">';
     h += '<div class="acontent">'+fmt(it.answer)+'</div>';
@@ -532,6 +557,17 @@ function makeCard(it, inModal){
     ans.addEventListener("click", reveal);
     ans.addEventListener("keydown", function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); reveal(); } });
   }
+  var pager = $(".pager", el);
+  if (pager){
+    var dots = $$(".pdots i", el);
+    var plabel = $(".pdots .plabel", el);
+    pager.addEventListener("scroll", function(){
+      var pIdx = Math.round(pager.scrollLeft / Math.max(1, pager.clientWidth));
+      dots.forEach(function(dd, k){ dd.classList.toggle("on", k === pIdx); });
+      if (plabel && pIdx > 0) plabel.style.opacity = "0";
+    }, {passive:true});
+  }
+
   $$(".rbtn", el).forEach(function(b){
     b.addEventListener("click", function(e){
       e.stopPropagation();
@@ -541,9 +577,12 @@ function makeCard(it, inModal){
   });
 
   /* double-tap anywhere on the card body = save for review */
-  var lastTap = 0;
-  $(".card-inner", el).addEventListener("pointerup", function(e){
+  var lastTap = 0, downX = 0, downY = 0;
+  var innerEl = $(".card-inner", el);
+  innerEl.addEventListener("pointerdown", function(e){ downX = e.clientX; downY = e.clientY; }, {passive:true});
+  innerEl.addEventListener("pointerup", function(e){
     if (e.target.closest(".rbtn") || e.target.closest(".answer")) return;
+    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 12){ lastTap = 0; return; }
     var now = Date.now();
     if (now - lastTap < 320){
       if (!S.review[it.id]) toggleReview(it.id);

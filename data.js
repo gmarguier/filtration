@@ -817,3 +817,199 @@ body:"For market questions: what is the **replication**, what is the residual ri
 body:"Shrink it (n = 2). Push it to extremes. Discretize it. Draw the state graph. Try the complement.\nAnd narrate — a silent minute reads as a lost one, while a spoken dead-end is just process. The only unrecoverable state in an interview is silence."}
 
 ];
+
+/* =========================================================================
+   FEED_EXTRAS — additional swipeable pages per card (horizontal carousel).
+   Key = card id; value = array of extra pages (strings, markdown-lite + KaTeX).
+   Page 1 is always the card's body; these render as pages 2, 3, …
+   ========================================================================= */
+window.FEED_EXTRAS = {
+
+/* --- probability --- */
+p01:["**Worked examples.** Expected fixed points of a random permutation: \\( \\sum_{i=1}^n \\mathbb{P}(i \\text{ fixed}) = n\\cdot\\tfrac1n = 1 \\) — independent of n.\nExpected birthday-sharing pairs among n people: \\( \\binom{n}{2}/365 \\). Set it to 1 → n ≈ 28, the heuristic behind the birthday paradox."],
+
+p04:["**Worked example: random sums.** \\( S = \\sum_{i=1}^N X_i \\) with \\( N \\perp X_i \\):\n\\[ \\operatorname{Var}(S) = \\mathbb{E}[N]\\operatorname{Var}(X) + \\operatorname{Var}(N)\\,\\mathbb{E}[X]^2. \\]\nCompound Poisson (\\( N \\sim \\mathrm{Poi}(\\lambda) \\)): both terms merge into \\( \\lambda\\,\\mathbb{E}[X^2] \\). This is the standard model for daily P&L as a sum of random trade counts × trade sizes."],
+
+p06:["**Interview angle.** Jensen is the one-line answer to a whole family: why is \\( \\mathbb{E}[\\max(X,Y)] \\ge \\max(\\mathbb{E}X, \\mathbb{E}Y) \\) (max is convex); why risk-averse agents have concave utility; why \\( \\mathbb{E}[\\log W] \\) punishes volatility (log concave — the Kelly connection); and AM–GM itself: apply Jensen to log."],
+
+p13:["**Deep dive: the full conditional.** For \\( \\begin{pmatrix}X\\\\Y\\end{pmatrix} \\sim \\mathcal{N}(\\mu, \\Sigma) \\) partitioned:\n\\[ X \\mid Y=y \\sim \\mathcal{N}\\big(\\mu_1 + \\Sigma_{12}\\Sigma_{22}^{-1}(y-\\mu_2),\\ \\Sigma_{11} - \\Sigma_{12}\\Sigma_{22}^{-1}\\Sigma_{21}\\big). \\]\nLinear mean, data-independent covariance. This single formula **is** the Kalman filter update, kriging, and GP regression."],
+
+p15:["**Why Beta.** Density of \\( U_{(k)} \\): pick which uniform lands at x, which k−1 fall below, which n−k above:\n\\[ f(x) = \\frac{n!}{(k-1)!\\,(n-k)!}\\,x^{k-1}(1-x)^{n-k}. \\]\nThe combinatorial derivation is worth saying aloud — it shows you *own* the formula rather than rent it."],
+
+p16:["**Follow-up: the spread.** \\( \\operatorname{Var} = \\sum_k \\tfrac{1-p_k}{p_k^2} \\approx \\tfrac{\\pi^2}{6}n^2 \\), so σ ≈ 1.3 n — the collection time is genuinely volatile, not just long.\nFor the die: mean 14.7, σ ≈ 6.2. Quoting both numbers is the difference between a memorized answer and a understood one."],
+
+p18:["**The count, explicitly.** Families with two children, at least one Tuesday boy:\nboy–boy: 7 + 7 − 1 = **13** (subtract the double-count where both are Tuesday boys); boy–girl and girl–boy: 7 each → **14**.\nP(both boys) = 13/27. As the detail gets rarer (born on Jan 1st), the answer → 1/2: a rare tag almost surely identifies *one specific* child."],
+
+p25:["**Why 1/n!.** \\( \\mathbb{P}(U_1+\\cdots+U_n \\le 1) \\) is the volume of the simplex \\( \\{u_i > 0, \\sum u_i \\le 1\\} \\).\nSlickest proof: the cube [0,1]ⁿ splits into n! congruent regions by the ordering of coordinates, and the simplex is the image of one of them. Then \\( \\mathbb{E}[N] = \\sum_n \\mathbb{P}(N > n) = \\sum_n 1/n! = e \\)."],
+
+p29:["**A genuinely surprising fact.** The record indicators are *independent* (Rényi): whether draw k is a record ⊥ whether draw j is.\nSo the number of records is a sum of independent Bernoulli(1/k): mean \\( H_n \\), variance \\( \\sum \\tfrac1k(1-\\tfrac1k) \\approx \\ln n \\), and a CLT holds. Records in n = 1000 draws: about 7.5 ± 2.6."],
+
+p30:["**Proof skeleton (worth reciting).** For any λ > 0: \\( \\mathbb{P}(S_n \\ge t) \\le e^{-\\lambda t}\\,\\mathbb{E}[e^{\\lambda S_n}] \\) (Markov on the exponential).\nIndependence factorizes the mgf; **Hoeffding's lemma** bounds each factor by \\( e^{\\lambda^2(b-a)^2/8} \\); optimize λ. The recipe — exponentiate, factorize, optimize — is the master key to every concentration bound."],
+
+/* --- stochastic processes --- */
+s02:["**Companions & traps.** Convex function of a martingale = **submartingale** (conditional Jensen): \\( S_n^2, |S_n|, e^{\\theta S_n} \\) all drift up.\nTrap: “martingale increments are independent” — false in general (they are only *uncorrelated*). The counterexamples live exactly in that gap."],
+
+s04:["**Autopsy of the doubling paradox.** Bet 1, 2, 4, … on fair coin flips until the first win: profit +1 always, yet each bet is fair.\nWhich OST hypothesis fails? \\( \\tau \\) is finite with \\( \\mathbb{E}[\\tau]=2 \\) — fine. The killer: **increments are unbounded** (and the strategy needs unbounded capital / is not UI). Knowing *which* condition breaks is the interview answer."],
+
+s05:["**The two lines in full.** Let \\( p = \\mathbb{P}(\\text{hit } a) \\).\nOST on \\( S_n \\): \\( 0 = pa - (1-p)b \\Rightarrow p = \\tfrac{b}{a+b} \\).\nOST on \\( S_n^2 - n \\): \\( \\mathbb{E}[\\tau] = \\mathbb{E}[S_\\tau^2] = p a^2 + (1-p) b^2 = ab \\).\nDeliver both in under a minute and the interviewer relaxes."],
+
+s06:["**Limits worth memorizing.** Down-biased walk (p < q): \\( \\mathbb{P}(\\text{ever gain } +1) = p/q \\), and ever gain +k: \\( (p/q)^k \\). Up-biased: reaching any level above is certain.\nAt p = q the walk reaches everything with probability 1 — but with **infinite expected time**. Certain ≠ fast."],
+
+s08:["**The machinery, once.** For HH: let \\( E_\\varnothing, E_H \\) be expected flips from scratch / after a head:\n\\( E_\\varnothing = 1 + \\tfrac12 E_H + \\tfrac12 E_\\varnothing \\), \\( E_H = 1 + \\tfrac12\\cdot0 + \\tfrac12 E_\\varnothing \\) → solve: 6.\nEvery pattern-waiting problem is this system with different resets. Set it up cleanly and the rest is arithmetic."],
+
+s09:["**Why the casino is fair.** Before each letter, a new gambler bets 1 on “A”, then lets everything ride on B, R, A… Each bet is fair, so the total wealth process is a martingale.\nAt the stop, surviving gamblers hold \\( 26^{11} \\) (started 11 letters ago), \\( 26^4 \\) (ABRA suffix), \\( 26 \\) (A). OST: expected stakes in = payout → \\( \\mathbb{E}[T] = 26^{11}+26^4+26 \\). Overlaps literally pay."],
+
+s12:["**How to *find* the martingale.** Discrete: solve harmonicity \\( h = Ph \\) (e.g. \\( h(x) = (q/p)^x \\) for the biased walk). Continuous: solve \\( \\mathcal{L}f = 0 \\) for the generator.\nUniversal trick for iid walks: \\( e^{\\theta S_n}/m(\\theta)^n \\) with \\( m(\\theta) = \\mathbb{E}[e^{\\theta X}] \\) — a martingale for **every** θ; differentiate in θ to harvest more."],
+
+s17:["**Worked micro-example.** Two states, stay-probabilities 0.9 and 0.8. Balance: \\( 0.1\\,\\pi_A = 0.2\\,\\pi_B \\Rightarrow \\pi = (\\tfrac23, \\tfrac13) \\).\nExpected return time to B: \\( 1/\\pi_B = 3 \\). Thirty seconds, no matrices — flow-balance beats solving \\( \\pi P = \\pi \\) by hand every time."],
+
+s19:["**The counting behind it.** Knight-move graph on 8×8: sum of degrees = 336, so |E| = 168. Corner degree = 2.\nMagic of reversibility: the answer needs **zero** analysis of the chain's transient behavior — no eigenvalues, no absorption equations. Recognizing “random walk on a graph” is the entire problem."],
+
+s23:["**Proof in one picture.** Cycle lemma: among the \\( a+b \\) cyclic rotations of any counting order, **exactly \\( a-b \\)** keep A strictly ahead throughout.\nEvery rotation class is equally likely ⇒ \\( \\mathbb{P} = \\tfrac{a-b}{a+b} \\). Alternative: reflect the first touch of 0 — the André reflection that also powers the Catalan numbers."],
+
+s26:["**Size-biasing, quantified.** Landing “at random in time” selects a gap with probability ∝ its length:\n\\[ \\mathbb{E}[\\text{gap you land in}] = \\frac{\\mathbb{E}[L^2]}{\\mathbb{E}[L]} \\]\n— for Exp(λ): \\( 2/\\lambda \\), twice the average gap; your wait is uniform inside it. Same bias explains “my bus line is always worse” and why sampled trades look bigger than average trades."],
+
+s29:["**Deriving the hitting density.** \\( \\mathbb{P}(\\tau_a \\le t) = \\mathbb{P}(M_t \\ge a) = 2\\,\\mathbb{P}(B_t \\ge a) = 2\\Phi(-a/\\sqrt{t}) \\).\nDifferentiate in t → \\( f_{\\tau_a}(t) = \\frac{a}{\\sqrt{2\\pi t^3}}\\,e^{-a^2/2t} \\). Tail \\( \\sim t^{-3/2} \\): heavy enough that the mean diverges — a Lévy(1/2) distribution."],
+
+s31:["**The orthant formula (own it).** Standard bivariate normal, correlation ρ:\n\\[ \\mathbb{P}(X>0, Y>0) = \\frac14 + \\frac{\\arcsin\\rho}{2\\pi}. \\]\nChecks: ρ = 0 → 1/4; ρ = 1 → 1/2; ρ = −1 → 0. It converts a whole family of “both positive” Brownian questions into arithmetic."],
+
+s34:["**Two one-line proofs.** Min: \\( \\mathbb{P}(\\min > t) = \\prod_i e^{-\\lambda_i t} = e^{-(\\sum\\lambda_i)t} \\).\nWinner: \\( \\mathbb{P}(X_i \\text{ first}) = \\int_0^\\infty \\lambda_i e^{-\\lambda_i t}\\prod_{j\\ne i} e^{-\\lambda_j t}\\,dt = \\frac{\\lambda_i}{\\sum_j \\lambda_j} \\).\nThe independence of winner and time is the subtle part — it is special to exponentials."],
+
+/* --- stochastic calculus --- */
+c01:["**Interview angle.** For deterministic \\( f \\): \\( \\int_0^t f(s)\\,dB_s \\sim \\mathcal{N}\\big(0, \\int_0^t f(s)^2 ds\\big) \\) — the isometry *is* the variance calculator, and Gaussianity survives because the integrand does not look at the path.\nWhy left endpoints: evaluating H mid-interval (Stratonovich) adds \\( \\tfrac12 d\\langle H,B\\rangle \\) and destroys the martingale property — fine for physics, wrong for trading gains."],
+
+c02:["**Where (dB)² = dt comes from.** Over a grid, \\( \\sum (\\Delta B_i)^2 \\) has mean \\( t \\) and variance \\( \\sum 2(\\Delta t_i)^2 \\to 0 \\): the sum of squared increments *converges to t*, deterministically.\nMicro-drill: \\( d(tB_t) = B\\,dt + t\\,dB \\) — no correction, since \\( dt\\,dB = 0 \\). Corrections appear only through \\( (dB)^2 \\)."],
+
+c03:["**Self-check ritual.** After any Itô expansion, ask: is the \\( dB \\) part the martingale piece, and does the \\( dt \\) part vanish under expectation the way the problem demands?\nDrill: \\( f(x)=x^2 \\Rightarrow d(B^2) = 2B\\,dB + dt \\) — integrate, take expectations: \\( \\mathbb{E}[B_t^2] = t \\). Ten seconds, and it catches sign errors before the interviewer does."],
+
+c04:["**Follow-ups they chain on.** Take expectations: \\( \\mathbb{E}\\int B\\,dB = 0 \\) (martingale) ⇒ \\( \\mathbb{E}[B_t^2] = t \\), consistent.\nStratonovich would give \\( \\tfrac12 B_t^2 \\) — the classical chain rule; the \\( -t/2 \\) is exactly the Itô-vs-Stratonovich gap. And by the isometry: \\( \\operatorname{Var}\\big(\\int_0^t B\\,dB\\big) = \\int_0^t s\\,ds = t^2/2 \\)."],
+
+c05:["**The general ladder.** \\( \\mathbb{E}[B_t^{2n}] = (2n-1)!!\\,t^n \\) (odd moments vanish): 1, 3t², 15t³, …\nBonus everyone forgets: \\( \\operatorname{Var}(B_t^2) = \\mathbb{E}[B^4] - t^2 = 2t^2 \\) — the χ² variance. It reappears as the variance of realized variance, i.e. why vol-of-vol exists even in a constant-vol world."],
+
+c06:["**Where you cash this in.** \\( \\mathbb{E}[e^{\\sigma B_T}] = e^{\\sigma^2 T/2} \\) prices anything lognormal: \\( \\mathbb{E}[S_T] = S_0 e^{\\mu T} \\) for GBM (the \\( -\\sigma^2/2 \\) and \\( +\\sigma^2/2 \\) cancel).\nAnd \\( \\mathcal{E}_t = e^{\\sigma B_t - \\sigma^2 t/2} \\) is precisely the Girsanov density — the same object prices moments *and* changes measures."],
+
+c07:["**The Hermite family.** \\( e^{\\theta x - \\theta^2 t/2} = \\sum_n \\tfrac{\\theta^n}{n!} H_n(x,t) \\): expanding the exponential martingale in θ generates them all —\n\\( B \\), \\( B^2 - t \\), \\( B^3 - 3tB \\), \\( B^4 - 6tB^2 + 3t^2 \\), … each a martingale (coefficients of a martingale are martingales). One generating function, infinite exam answers."],
+
+c08:["**Numbers that make it real.** μ = 10%, σ = 40%: the mean grows at 10%, the **median** at \\( 10 - \\tfrac{16}{2} = 2\\% \\). Most paths underperform the average — a few lucky ones carry it.\nAlso: \\( \\mathbb{P}(S_T > K) = \\Phi\\big(\\tfrac{\\ln(S/K) + (\\mu - \\sigma^2/2)T}{\\sigma\\sqrt{T}}\\big) \\) — the d₂ shape, with μ in place of r."],
+
+c09:["**Discrete twin & trading link.** Sampled on a grid, OU is exactly **AR(1)** with \\( \\varphi = e^{-\\kappa\\Delta t} \\).\nHalf-life of a shock: \\( \\ln 2/\\kappa \\) — the number pairs traders actually quote (“this spread mean-reverts in 3 days”). Estimate κ by regressing \\( \\Delta X \\) on \\( X \\): slope ≈ −κΔt."],
+
+c10:["**What changes, what cannot.** Girsanov reweights *path probabilities* — drift moves, but quadratic variation is a pathwise property, so **σ is untouchable** by any equivalent measure change.\nInterview one-liner: “P and Q disagree about how likely paths are, never about how rough they are.” Novikov (\\( \\mathbb{E}[e^{\\frac12\\int\\lambda^2}] < \\infty \\)) is the license to do this."],
+
+c11:["**Special cases to recognize.** μ = 0, r = 0: the (backward) heat equation \\( u_t + \\tfrac12 u_{xx} = 0 \\) — option prices diffuse like temperature.\nPractical translation: Monte Carlo *is* a PDE solver by sampling, finite differences *are* an expectation evaluator by stepping. Same object, two algorithms — say that and the question is over."],
+
+c12:["**Completeness accounting.** One Brownian, one risky asset ⇒ every claim replicable (complete). More noise sources than traded assets (stochastic vol without a vol instrument, jumps) ⇒ **incomplete**: a whole interval of no-arbitrage prices, pinned only by preferences or by adding hedge instruments.\nThe integrand H in the representation is literally the delta."],
+
+c13:["**Worked: covariance of two BMs.** \\( d(B^1B^2) = B^1 dB^2 + B^2 dB^1 + \\rho\\,dt \\); take expectations: \\( \\mathbb{E}[B^1_t B^2_t] = \\rho t \\).\nSame product rule gives the pricing of quantos and spread options their cross terms — the ρ dt line item is where correlation risk enters every two-asset book."],
+
+c14:["**From theory to the desk.** Realized variance \\( \\sum (\\Delta \\ln S)^2 \\to \\int_0^T \\sigma_s^2\\,ds \\): sampling the quadratic variation.\nVol targeting = trying to trade in the **QV clock** at constant speed. And the DDS view explains fat tails: mix a Gaussian over a random clock and kurtosis appears for free."],
+
+c15:["**Read the transform like a trader.** \\( \\mathbb{E}[e^{-\\lambda\\tau_a}] = e^{-a\\sqrt{2\\lambda}} \\) is a *price*: a perpetual one-touch paying 1 at hitting, discounted at rate λ.\nThe \\( \\sqrt{\\lambda} \\) (non-analytic at 0) encodes the \\( t^{-3/2} \\) tail; \\( -\\partial_\\lambda \\) at 0 diverges → \\( \\mathbb{E}[\\tau_a] = \\infty \\). With drift ν toward the barrier: \\( \\exp\\big(a\\nu - a\\sqrt{\\nu^2 + 2\\lambda}\\big) \\)."],
+
+c16:["**Why √X is delicate — and fine.** \\( \\sqrt{x} \\) is not Lipschitz at 0, so the standard theorem is silent; Yamada–Watanabe (Hölder-½ diffusion coefficients, dimension 1) rescues uniqueness.\nSimulation reality: naive Euler goes negative — use full-truncation Euler or exact CIR sampling (noncentral χ²). Feller \\( 2\\kappa\\theta \\ge \\sigma^2 \\): the boundary at 0 is unattainable."],
+
+c17:["**The joint law, for barriers.** Reflection gives the pair: for \\( a \\ge \\max(0, x) \\),\n\\[ \\mathbb{P}(M_t \\ge a,\\ B_t \\le x) = \\mathbb{P}(B_t \\ge 2a - x). \\]\nDifferentiate for the joint density — this is the engine behind barrier-option formulas and drawdown probabilities. The image path reflected at level a does all the work."],
+
+c18:["**Trader's translation.** A digital's payoff kink ⇒ gamma concentrates into a spike at the strike as expiry nears — hedging costs explode exactly there; desks smooth it by quoting a call spread of finite width.\nBarriers inherit the same disease at the barrier level. Local time is the mathematical name of that hedging pain."],
+
+/* --- quant questions --- */
+q02:["**The bigger picture.** “Keep if above the continuation value” — the threshold (4, then 5) *is* an exercise boundary; the game is a two-step American option.\nGeneral recursion: \\( E_k = \\mathbb{E}[\\max(X, E_{k-1})] \\), thresholds rising toward 6 as re-rolls stack. Any interviewer can extend this; the recursion is the answer they want."],
+
+q04:["**The general gap formula.** N cards total, k of them special: \\( \\mathbb{E}[\\text{position of first special}] = \\dfrac{N+1}{k+1} \\) — check: \\( \\tfrac{53}{5} = 10.6 \\).\nAnd the j-th special sits at \\( j\\,\\tfrac{N+1}{k+1} \\) on average: aces at 10.6, 21.2, 31.8, 42.4 — evenly spread by the exchangeability of the five gaps."],
+
+q07:["**Why the events are disjoint.** For each point i, let \\( A_i \\) = “the semicircle starting at i going clockwise contains everyone”. If all points fit in *some* semicircle, exactly **one** of them is its clockwise-most point — so exactly one \\( A_i \\) occurs.\n\\( \\mathbb{P}(A_i) = 2^{-(n-1)} \\), sum over i: \\( n/2^{n-1} \\). Union without inclusion–exclusion, because uniqueness was engineered."],
+
+q13:["**De Finetti's reading.** The draw sequence is exchangeable, so it behaves as “first pick a random p, then flip iid coins(p)” — and for the 1+1 urn, that hidden prior is exactly **U(0,1)**.\nPólya's urn = Beta-Bernoulli in disguise: after observing the past, the predictive is Laplace's rule of succession \\( \\tfrac{r+1}{n+2} \\)."],
+
+q14:["**Derivation + the danger zone.** Maximize \\( g(f) = p\\ln(1+f) + q\\ln(1-f) \\): \\( g'(f) = 0 \\Rightarrow f^* = p - q \\).\nSmall-edge quadratic: \\( g(f) \\approx f(p-q) - f^2/2 \\) — a parabola whose *other* zero is at 2f*: **betting double-Kelly earns nothing** and adds all the variance; beyond it, growth is negative. Half-Kelly: ¾ of the growth, half the pain."],
+
+q15:["**Why 1/e appears.** Skip r, then success prob \\( \\approx \\tfrac{r}{n}\\ln\\tfrac{n}{r} \\) (the best must come after r, and the best-so-far at its time must be among the first r).\nMaximize \\( x\\ln(1/x) \\): x* = 1/e, value 1/e. The same explore-commit trade-off runs bandit warm-ups and “when to stop interviewing candidates” in real hiring."],
+
+q18:["**The recipe, portable.** Offspring pgf \\( \\varphi(s) = \\tfrac{1+s+s^2+s^3}{4} \\), mean \\( m = \\varphi'(1) = 1.5 > 1 \\) → extinction is possible but not certain.\nSolve \\( \\varphi(s) = s \\), discard the root s = 1, keep the smallest in [0,1]. Every “does this population/desk/meme die out” question is this three-step recipe."],
+
+q19:["**Two proofs, both elegant.** (1) The remaining-red fraction is a martingale; your success probability is its value at your stopping time — optional stopping freezes it at ½.\n(2) Coupling: the card after your “stop” is a uniformly random unseen card — which has exactly the distribution of the **bottom card of the deck**. Nobody can beat the bottom card."],
+
+q25:["**The general threshold.** Value to you = c·V, seller accepts iff b ≥ V ~ U(0,M). Conditional on acceptance, \\( \\mathbb{E}[\\text{profit}] = \\tfrac{c}{2}b - b \\): positive only if **c > 2**.\nAt c = 1.5, every bid loses on average *when it wins* — adverse selection in its purest form. This is why market makers widen quotes against flow they suspect is informed."],
+
+q26:["**Second moments & shape.** Loop-closure events at each step are independent-ish enough: \\( \\operatorname{Var} \\approx \\sum \\tfrac{1}{2k-1}\\big(1 - \\tfrac{1}{2k-1}\\big) \\approx 2.6 \\) — the count is small *and* concentrated.\nAlso \\( \\mathbb{P}(\\text{exactly one giant loop}) = \\prod_{k=2}^{100} \\tfrac{2k-2}{2k-1} \\approx 8\\% \\): a few big loops dominate, mirroring random permutation cycle structure."],
+
+/* --- finance --- */
+f02:["**The arbitrage, executed.** If \\( C - P > S - Ke^{-rT} \\): sell the call, buy the put, buy the stock, borrow \\( Ke^{-rT} \\) (a *conversion*). At expiry every branch nets zero; today you pocket the gap.\nParity also implies \\( \\sigma_{imp}(call) = \\sigma_{imp}(put) \\) strike by strike — quote skew is about strikes, never about call-vs-put."],
+
+f04:["**Derivation in four beats.** (1) Portfolio \\( V = C - \\Delta S \\); (2) Itô on C; (3) choose \\( \\Delta = \\partial_S C \\) → the dB term dies; (4) riskless ⇒ earns r:\n\\[ \\partial_t C + \\tfrac12\\sigma^2 S^2 \\partial_S^2 C + rS\\,\\partial_S C - rC = 0. \\]\nA change of variables turns it into the heat equation — which is why the solution looks like Gaussians."],
+
+f05:["**Why two probabilities.** Write \\( C = \\mathbb{E}^{\\mathbb{Q}}[e^{-rT}(S_T - K)^+] = S\\,\\mathbb{Q}^S(S_T > K) - Ke^{-rT}\\,\\mathbb{Q}(S_T > K) \\): the first term uses the **stock as numéraire** (measure \\( \\mathbb{Q}^S \\)), the second the bank account.\nΦ(d₁) > Φ(d₂) always — under the stock measure, big-S paths get extra weight."],
+
+f07:["**Where 0.4 comes from.** ATM, r = 0: \\( C = S[\\Phi(\\tfrac{\\sigma\\sqrt T}{2}) - \\Phi(-\\tfrac{\\sigma\\sqrt T}{2})] \\approx S\\,\\sigma\\sqrt{T}\\,\\varphi(0) = \\tfrac{S\\sigma\\sqrt T}{\\sqrt{2\\pi}} \\).\n\\( 1/\\sqrt{2\\pi} = 0.399 \\). Drill: S = 400, σ = 25%, 3 months → 400 × 0.4 × 0.25 × 0.5 = **20**. Answer in four seconds, then refine."],
+
+f08:["**The breakeven move.** Long a delta-hedged straddle: daily P&L ≈ \\( \\tfrac12\\Gamma S^2(\\Delta S/S)^2 + \\Theta\\,\\Delta t \\). Breakeven daily move:\n\\[ |\\Delta S| = \\sigma_{imp}\\,S\\sqrt{\\Delta t} \\]\n— you need the day's move to beat the implied daily vol (σ/16 of spot, roughly). “Did today move more than a sixteenth of annual vol?” is the gamma trader's morning question."],
+
+f09:["**Why the path matters.** The weight \\( \\Gamma_t S_t^2 \\) (dollar gamma) peaks when spot sits near the strike — realized vol *there* is what you monetize.\nSpot drifts far away → gamma ≈ 0 → even huge realized vol earns nothing. Variance swaps exist precisely to delete this path-dependence and pay realized vol wherever it happens."],
+
+f11:["**Derivation, two differentiations.** \\( C(K) = e^{-rT}\\int_K^\\infty (s-K)\\,q(s)\\,ds \\).\n∂/∂K: \\( -e^{-rT}\\int_K^\\infty q = -e^{-rT}\\,\\mathbb{Q}(S_T > K) \\) — the (discounted) survival function.\n∂²/∂K²: \\( e^{-rT} q(K) \\). Butterfly ≈ second difference of calls — you can *see* the density on a strike ladder."],
+
+f13:["**The dividend condition, precisely.** Exercise a call just before an ex-div date iff the dividend you capture exceeds what you give up: interest on the strike + remaining time value:\n\\( D > K(1 - e^{-r\\tau}) + \\text{TV} \\).\nPut mirror-logic: exercise deep ITM when interest on K outweighs remaining optionality — high rates make American puts genuinely American."],
+
+f14:["**Replication algebra (say it once, own it).** Solve \\( \\Delta S u + Be^{r\\Delta t} = V_u \\) and \\( \\Delta S d + Be^{r\\Delta t} = V_d \\):\n\\( \\Delta = \\tfrac{V_u - V_d}{S(u-d)} \\), B = the rest. Price = ΔS + B, and rearranging *produces* q — risk-neutral probability is the shadow price of replication, not an opinion about the world."],
+
+f16:["**Why 1/K² exactly.** Itô: \\( d\\ln S = \\tfrac{dS}{S} - \\tfrac12\\sigma^2 dt \\) ⇒ realized variance \\( = \\tfrac{2}{T}\\big(\\int \\tfrac{dS}{S} - \\ln\\tfrac{S_T}{S_0}\\big) \\): a delta position plus a **short log contract**.\nExpanding the log payoff over vanillas requires weights \\( 1/K^2 \\) — which is also the weighting that gives every strike equal vega. Two derivations, same answer: good sign."],
+
+f21:["**When √T lies.** Positive autocorrelation (momentum) ⇒ long-horizon vol > daily×√T; mean reversion ⇒ less. The **variance ratio** \\( VR(q) = \\tfrac{\\operatorname{Var}(r_{q\\text{-day}})}{q\\operatorname{Var}(r_{1\\text{-day}})} \\) tests it: 1 for a random walk.\nAlso the reason Sharpe ratios of smoothed/illiquid strategies are inflated — stale prices manufacture autocorrelation."],
+
+f24:["**The dictionary entry.** Market price of risk \\( \\lambda = \\tfrac{\\mu - r}{\\sigma} \\) — the stock's Sharpe ratio — is exactly the Girsanov shift taking \\( \\mathbb{P} \\to \\mathbb{Q} \\).\nOne λ per source of noise; assets driven by the same Brownian must share it, or arbitrage. “Q = P minus the price of fear” is flippant but memorable."],
+
+/* --- brainteasers --- */
+b01:["**The math under the cycles.** All fail iff the permutation contains a cycle longer than 50; a cycle of length k > n/2 is unique, with probability exactly 1/k.\n\\( \\mathbb{P}(\\text{fail}) = \\sum_{k=51}^{100} \\tfrac1k \\approx \\ln 2 = 0.693 \\). The strategy's genius: it makes prisoners' fates *maximally correlated* — either the permutation is good for everyone or bad for everyone."],
+
+b04:["**General egg calculus.** With d drops and e eggs you can distinguish \\( \\sum_{i=1}^{e}\\binom{d}{i} \\) floors. Two eggs: \\( d(d+1)/2 \\) → 14 for 100.\nThree eggs for 1000 floors: 19 drops. Scaling: worst case ~ \\( e\\,n^{1/e} \\) — each extra egg buys a root. The equalize-the-worst-case principle transfers to search problems generally."],
+
+b12:["**The clean symmetry proof.** Track only seats 1 and 100. Every randomly-seating passenger either picks seat 1 (chaos ends, 100 wins), seat 100 (100 loses), or defers. At each random choice the two fatal seats are **equally likely** — so the final coin is fair.\nBonus: later boarders are the exposed ones — \\( \\mathbb{P}(\\text{passenger } k \\text{ displaced}) = \\tfrac{1}{102-k} \\): from 1/100 for the second passenger up to 1/2 for the last. The middle of the plane barely notices."],
+
+b16:["**Chamber bookkeeping.** Label chambers 1–6, bullets in 1–2. A click means the fired chamber was one of {3,4,5,6}; the *next* chamber holds a bullet only if we just fired 6 → next is 1. So P(death | pull) = 1/4.\nRe-spin resets to the prior: 2/6. **Non-adjacent bullets flip it**: both bullets then sit after empty chambers, so pulling kills with 2/4 = 1/2 vs 1/3 after a spin — spin. Rule: count which empty chambers precede a bullet."],
+
+b21:["**With a proper prior, resolved.** Put any real prior on the smaller amount; observe x in your envelope. Switching is favorable iff \\( \\mathbb{P}(\\text{yours is smaller} \\mid x) > \\tfrac{\\text{loss}}{\\text{gain+loss}} \\) — which depends on the prior's tails at x.\nUnconditionally the gain is exactly 0. The paradox is a lesson in *conditioning on the observed value*, and it is why “switch if x feels small” can genuinely work."],
+
+b25:["**Why intuition says 3 — and is wrong.** “All rolls even” feels like rolling a 3-sided die {2,4,6} and waiting for 6: that experiment gives 3.\nBut conditioning ≠ restricting: sequences with any odd roll are *discarded*, and long sequences almost always contain one. Survivorship pulls the conditional length down to 3/2. Same logic corrupts backtests filtered on survival."],
+
+/* --- statistics --- */
+t01:["**Worked: Gaussian MLE.** \\( \\ell = -\\tfrac n2\\ln(2\\pi\\sigma^2) - \\tfrac{1}{2\\sigma^2}\\sum(x_i-\\mu)^2 \\). Score in μ → \\( \\hat\\mu = \\bar x \\); in σ² → \\( \\hat\\sigma^2 = \\tfrac1n\\sum(x_i-\\bar x)^2 \\) — the /n, biased version.\nInvariance bonus: MLE of σ is the square root of the MLE of σ². No re-optimization — that is the point of invariance."],
+
+t05:["**How to talk about it like an adult.** p = 0.049 and p = 0.051 are the *same evidence*; the 0.05 cliff is convention, not chemistry.\nAlways pair the p-value with an **effect size and CI**: “significant but tiny” and “huge but noisy” are different business decisions. In trading language: t-stat tells you it is not luck; magnitude tells you if it pays costs."],
+
+t07:["**The odds shortcut.** Posterior odds = prior odds × likelihood ratio:\n\\[ \\frac{1}{999} \\times \\frac{0.99}{0.01} \\approx \\frac{1}{10} \\Rightarrow \\mathbb{P} \\approx 9\\%. \\]\nOdds form makes sequential updating additive (in log): stack tests by summing log-LRs. This is also precisely how a Bayesian reads a backtest t-stat given a skeptical prior on strategies."],
+
+t09:["**The geometry (draw it).** y lives in ℝⁿ; the model spans a p-dim subspace; OLS drops the perpendicular: \\( \\hat y = Hy \\), residual \\( \\perp \\) every column of X — that orthogonality *is* \\( X^\\top(y - X\\hat\\beta) = 0 \\), i.e. the normal equations.\nDegrees of freedom = tr(H) = p; R² = squared cosine of the angle between centered y and the model space."],
+
+t11:["**The soft-threshold picture.** Orthonormal design: ridge gives \\( \\hat\\beta_j = \\tfrac{z_j}{1+\\lambda} \\) (shrink everything proportionally); lasso gives \\( \\hat\\beta_j = \\operatorname{sign}(z_j)(|z_j| - \\lambda)_+ \\) (shrink and **kill** the small ones).\nThat one formula pair explains every ridge-vs-lasso interview answer: proportional damping vs sparsification."],
+
+t14:["**Benjamini–Hochberg, operationally.** Sort p-values ascending; find the largest k with \\( p_{(k)} \\le \\tfrac{k}{m}\\alpha \\); reject all hypotheses up to k.\nControls the *false discovery rate* (expected fraction of rejections that are false) — the right currency when screening 500 alpha signals, where Bonferroni would reject everything including the truth."],
+
+t16:["**One-line derivation.** Detect Δ when \\( \\tfrac{\\Delta}{\\sqrt{2\\sigma^2/n}} \\ge z_{0.975} + z_{0.80} = 1.96 + 0.84 = 2.8 \\).\nSolve: \\( n = 2(2.8)^2\\sigma^2/\\Delta^2 \\approx 15.7\\,\\sigma^2/\\Delta^2 \\). Every piece is a lever: one-sided tests, higher power, paired designs — you can re-derive any variant at the whiteboard."],
+
+t18:["**Half-lives, the practical unit.** Shock decay: \\( \\varphi^h = \\tfrac12 \\Rightarrow h = \\ln 2 / \\ln(1/\\varphi) \\): φ = 0.9 → 6.6 periods; φ = 0.99 → 69.\nEstimation warning: OLS \\( \\hat\\varphi \\) is biased *downward* in small samples (Kendall bias) — mean reversion in short backtests looks stronger than it is. The market pays for knowing that."],
+
+/* --- linear algebra --- */
+l01:["**Proof you can do at the board.** For symmetric A with \\( Au = \\lambda u, Av = \\mu v \\):\n\\( \\lambda\\langle u,v\\rangle = \\langle Au, v\\rangle = \\langle u, Av\\rangle = \\mu\\langle u,v\\rangle \\) ⇒ \\( (\\lambda-\\mu)\\langle u,v\\rangle = 0 \\).\nDistinct eigenvalues ⇒ orthogonal eigenvectors, in three lines. Realness: same trick with the conjugate inner product."],
+
+l02:["**Field repair kit.** A “correlation matrix” with a negative eigenvalue (from pairwise estimation, missing data, stress overrides): eigendecompose, clip \\( \\lambda_i \\leftarrow \\max(\\lambda_i, \\varepsilon) \\), reconstruct, rescale the diagonal to 1. (Higham's algorithm does it optimally.)\nSkip the repair and Cholesky crashes — or worse, your Monte Carlo silently simulates an impossible world."],
+
+l03:["**The algebra that makes PCA = SVD.** Centered data X (n×p): \\( X = U\\Sigma V^\\top \\Rightarrow \\) sample covariance \\( \\tfrac{X^\\top X}{n-1} = V\\,\\tfrac{\\Sigma^2}{n-1}\\,V^\\top \\).\nSo PCs = columns of V, component variances = \\( \\sigma_i^2/(n-1) \\), scores = UΣ. Compute via SVD of X, never by forming \\( X^\\top X \\) — conditioning squared is conditioning lost."],
+
+l06:["**The aI + bJ pattern.** Any matrix \\( aI + bJ \\) (J = all-ones): eigenvalues \\( a + bn \\) (once) and \\( a \\) (n−1 times).\nEquicorrelation matrix (1's diagonal, ρ off): eigenvalues \\( 1 + (n-1)\\rho \\) and \\( 1-\\rho \\) ⇒ PSD iff \\( \\rho \\ge -\\tfrac{1}{n-1} \\) — you cannot make many assets all strongly anti-correlated. A one-line risk fact worth gold."],
+
+l08:["**The 2×2 by hand.** \\( \\Sigma = \\begin{pmatrix}\\sigma_1^2 & \\rho\\sigma_1\\sigma_2\\\\ \\rho\\sigma_1\\sigma_2 & \\sigma_2^2\\end{pmatrix} \\Rightarrow L = \\begin{pmatrix}\\sigma_1 & 0\\\\ \\rho\\sigma_2 & \\sigma_2\\sqrt{1-\\rho^2}\\end{pmatrix} \\).\nRow 2 read aloud: “correlated part plus independent remainder” — the same decomposition as the regression of asset 2 on asset 1. Cholesky *is* sequential regression."],
+
+l12:["**Full derivation, once.** \\( \\|y - X\\beta\\|^2 = y^\\top y - 2\\beta^\\top X^\\top y + \\beta^\\top X^\\top X\\beta \\).\nGradient: \\( -2X^\\top y + 2X^\\top X\\beta = 0 \\Rightarrow X^\\top X\\beta = X^\\top y \\).\nAdd ridge \\( \\lambda\\|\\beta\\|^2 \\): \\( (X^\\top X + \\lambda I)\\beta = X^\\top y \\) — the +λI that fixes conditioning, derived rather than pasted."],
+
+/* --- math toolkit --- */
+m01:["**Harvest the moments.** Differentiate \\( I(a) = \\int e^{-ax^2}dx = \\sqrt{\\pi/a} \\) with respect to a:\n\\( \\int x^2 e^{-ax^2}dx = \\tfrac12\\sqrt{\\pi}a^{-3/2} \\) → at a = ½, normalized: \\( \\mathbb{E}[Z^2] = 1 \\), \\( \\mathbb{E}[Z^4] = 3 \\).\nOne integral, one parameter, all even Gaussian moments. Feynman's trick meeting the normal distribution."],
+
+m03:["**Where √(2πn) comes from.** \\( n! = \\int_0^\\infty t^n e^{-t}dt \\): the integrand \\( e^{n\\ln t - t} \\) peaks at t = n with curvature 1/n → a Gaussian bump of width \\( \\sqrt{n} \\).\nLaplace's method: value at peak × Gaussian width = \\( (n/e)^n \\times \\sqrt{2\\pi n} \\). The same saddle-point logic prices deep-OTM options and large deviations."],
+
+m08:["**The other classic lever.** \\( I(a) = \\int_0^\\infty e^{-ax^2}dx = \\tfrac12\\sqrt{\\pi/a} \\); differentiating in a manufactures \\( \\int x^{2k}e^{-ax^2} \\) for all k.\nRecipe: (1) embed a parameter, (2) differentiate or integrate in it, (3) evaluate at the value you need. If an integral resists, it usually lacks a parameter — add one."],
+
+m10:["**Second derivatives, second moments.** Differentiate again: \\( \\sum n^2 x^{n-1} \\) closed forms give \\( \\mathbb{E}[N^2] \\) for the geometric → \\( \\operatorname{Var}(N) = \\tfrac{1-p}{p^2} \\).\nGenerating-function reflex: multiply by n ⇔ differentiate; that is the entire mechanism behind pgf moment extraction \\( \\mathbb{E}[N] = G'(1) \\), \\( \\operatorname{Var} = G'' (1) + G'(1) - G'(1)^2 \\)."],
+
+m12:["**Two payoffs.** (1) *Backtesting densities*: if your forecast distributions are honest, the PIT values \\( F_t(x_t) \\) are iid U(0,1) — histogram them; U-shape = overconfident, hump = underconfident.\n(2) *Copulas*: \\( C(u,v) \\) glues uniform marginals into any dependence — Sklar. Marginals and dependence become separately chosen, separately stressed."]
+
+};

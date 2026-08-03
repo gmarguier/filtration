@@ -70,4 +70,20 @@ Tout le contenu vit dans **`data.js`** — un simple tableau. Ajoute un objet :
 - LaTeX : **double backslash** (`\\mathbb{E}`), délimiteurs `\\( \\)` et `\\[ \\]`.
 - Commit sur GitHub → l'app se met à jour toute seule (network-first).
 
+### Pages supplémentaires (carousel horizontal)
+
+Une carte peut avoir des pages swipeables vers la droite (dots sous le texte).
+Elles vivent dans `window.FEED_EXTRAS`, en bas de `data.js` :
+
+```js
+window.FEED_EXTRAS = {
+  "p01": ["**Deep dive** Deuxième page…", "**Worked example** Troisième page…"],
+};
+```
+
+La page 1 est toujours le `body` de la carte ; chaque entrée du tableau ajoute
+une page. Ça marche sur n'importe quelle carte, y compris les tiennes.
+
+---
+
 Bonnes révisions. 📈

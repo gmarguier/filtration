@@ -1,7 +1,7 @@
 /* Filtration service worker — offline after first visit.
    Same-origin: network-first (so updates to data.js/index.html land immediately).
    CDN assets (KaTeX, fonts): cache-first (versioned, immutable). */
-var CACHE = "filtration-v1";
+var CACHE = "filtration-v2";
 
 self.addEventListener("install", function (e) {
   self.skipWaiting();
