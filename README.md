@@ -1,10 +1,11 @@
 # Fₜ Filtration — ton feed quant
 
-Un mini-TikTok de révision pour entretiens quant : scroll vertical, **309 cartes**
+Un mini-TikTok de révision pour entretiens quant : scroll vertical, **355 cartes**
 (probas, martingales & temps d'arrêt, calcul sto, brainteasers + boss cards,
 questions type quantguide, finance/options, **marchés & market making**, algo,
 stats, **ML · GP · BayesOpt**, algèbre linéaire, boîte à outils math,
-**calcul mental**, **théorie de la mesure**), réponses à révéler, auto-évaluation
+**calcul mental**, **théorie de la mesure**, **intuition stats/ML
+sans calcul** — pour réviser sans stylo), réponses à révéler, auto-évaluation
 ✓/✗ avec précision par catégorie, **⚡ Daily Ten** chronométré, répétition espacée
 J+1 / J+3 / J+7, listes « Review » / « Mastered », progression et streak — et
 **zéro répétition** tant que tu n'as pas tout vu.
@@ -74,7 +75,7 @@ Tout le contenu vit dans **`data.js`** — un simple tableau. Ajoute un objet :
  answer:"La réponse (uniquement pour type question)."}
 ```
 
-- `cat` : `probability · stochastic · stochcalc · brainteaser · quant · finance · markets · algo · stats · mlai · linalg · math · mental · measure · meta`
+- `cat` : `probability · stochastic · stochcalc · brainteaser · quant · finance · markets · algo · stats · mlai · linalg · math · mental · measure · intuition · meta`
 - `type` : `concept` (affiché direct) · `question` (réponse à révéler) · `fact`
 - `diff` : 1 à 3 — `id` : libre mais unique.
 - LaTeX : **double backslash** (`\\mathbb{E}`), délimiteurs `\\( \\)` et `\\[ \\]`.

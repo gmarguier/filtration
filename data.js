@@ -1396,3 +1396,243 @@ body:"Lebesgue measure exists: define outer measure by countable interval covers
 pages:["**What to retain for exams and life.** (1) The splitting condition is a *definition of good behavior*, not a property to picture. (2) Completeness: subsets of null sets are measurable — Lebesgue > Borel. (3) Every construction you meet later (product measures, Hausdorff measures) replays this outer-measure two-step.\nDepth on demand; the skeleton fits on a card."]}
 
 ]);
+
+/* =========================================================================
+   WAVE: PURE STATS & ML INTERVIEW QUESTIONS (t21+, ml19+)
+   Question-type drills for concepts already covered — feeds Daily Ten & accuracy.
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"t21",cat:"stats",type:"question",diff:2,title:"“So you're 97% sure?”",
+body:"Your strategy's backtest shows p = 0.03. The interviewer says: “so there's a 97% chance the edge is real.” Correct them.",
+answer:"No — p is \\( \\mathbb{P}(\\text{data this extreme} \\mid H_0) \\), **not** \\( \\mathbb{P}(H_0 \\mid \\text{data}) \\).\nTo say anything about “chance the edge is real” you need a **prior** and Bayes — and if this strategy came out of a zoo of tested signals, the posterior can be far below 97%.",
+pages:["**Worked base-rate reversal.** You tested 100 signals; realistically ~10 have true edge; power 80%. True positives: 8. False positives: \\( 90\\times0.05 = 4.5 \\). Among your “significant” results: \\( \\tfrac{8}{12.5} = 64\\% \\) real — with an *honest* 5% test.\nSame arithmetic as the medical-test classic (t07), now aimed at your own research process. Multiple testing (t14) is the disease; this is its bedside manner."]},
+
+{id:"t22",cat:"stats",type:"question",diff:2,title:"Read this interval out loud",
+body:"A 95% confidence interval for a Sharpe ratio comes out as [0.2, 1.4]. What exactly does “95%” attach to — and what sentence is illegal?",
+answer:"It attaches to the **procedure**: over repeated samples, intervals built this way cover the truth 95% of the time.\nIllegal: “there is a 95% probability the true Sharpe lies in [0.2, 1.4]” — this realized interval either contains it or not. The probability-about-the-parameter sentence belongs to the **Bayesian credible interval**.",
+pages:["**Two useful re-readings.** (1) Duality with testing: the CI is exactly the set of values a 5% test would *not* reject — wide interval = weak evidence, visualized. (2) The recipe behind most of them: estimate ± 1.96 × SE, valid by CLT.\nInterview finisher: for a strategy, an interval containing 0 is the polite way of saying “you have not shown me anything yet.”"]},
+
+{id:"t23",cat:"stats",type:"question",diff:3,title:"MLE, but the derivative lies",
+body:"X₁,…,Xₙ iid Uniform(0, θ). Find the MLE of θ. Why does the usual “set the score to zero” recipe fail, and what is remarkable about this estimator?",
+answer:"Likelihood \\( \\theta^{-n}\\mathbf{1}\\{\\theta \\ge \\max X_i\\} \\) is **decreasing** in θ — the max sits at the boundary: \\( \\hat\\theta = \\max_i X_i \\). No zero-derivative anywhere.\nIt is biased low (\\( \\mathbb{E}[\\max] = \\tfrac{n}{n+1}\\theta \\)); the corrected \\( \\tfrac{n+1}{n}\\max \\) has variance \\( O(n^{-2}) \\) — **faster than the usual** \\( n^{-1} \\).",
+pages:["**Why superefficiency is allowed here.** The support depends on θ — a *non-regular* model, so Cramér–Rao (t04) simply does not apply; its hypotheses (differentiability, common support) fail.\nCompare with method of moments \\( 2\\bar X \\): variance \\( \\tfrac{\\theta^2}{3n} \\), versus \\( \\tfrac{\\theta^2}{n(n+2)} \\) for the corrected max — an entire order of magnitude. Moral for interviews: check regularity *before* quoting information bounds."]},
+
+{id:"t24",cat:"stats",type:"question",diff:3,title:"Earn the hat: derive OLS",
+body:"Derive \\( \\hat\\beta \\) for the linear model \\( y = X\\beta + \\varepsilon \\), give its geometric meaning, and state precisely in what sense it is “best”.",
+answer:"Minimize \\( \\|y - X\\beta\\|^2 \\): gradient zero gives the **normal equations** \\( X^\\top X\\hat\\beta = X^\\top y \\Rightarrow \\hat\\beta = (X^\\top X)^{-1}X^\\top y \\).\nGeometry: \\( X\\hat\\beta \\) is the **orthogonal projection** of y onto col(X); residuals ⟂ every column.\n**Gauss–Markov**: with exogeneity and homoscedastic, uncorrelated errors, OLS is BLUE — minimum variance among *linear unbiased* estimators. Normality nowhere required.",
+pages:["**What BLUE does not promise.** \\( \\operatorname{Var}(\\hat\\beta) = \\sigma^2(X^\\top X)^{-1} \\) — near-collinear columns make \\( X^\\top X \\) near-singular and the variance explodes (condition number, l-cards).\nAnd “best linear unbiased” loses to *biased* rivals on MSE: ridge (t11) and shrinkage (t20) trade a little bias for a lot of variance. Say that unprompted and the follow-up questions get friendlier."]},
+
+{id:"t25",cat:"stats",type:"question",diff:3,title:"Standard error of the median",
+body:"Everyone knows SE(mean) = σ/√n. What is the standard error of the sample **median**, and how would you actually get it in practice?",
+answer:"Asymptotically \\( \\sqrt{n}(\\hat m - m) \\to \\mathcal{N}\\big(0, \\tfrac{1}{4f(m)^2}\\big) \\) — it depends on the **density at the median**, which you rarely know.\nGaussian case: \\( SE \\approx 1.25\\,\\sigma/\\sqrt{n} \\) — the median is only \\( 2/\\pi \\approx 64\\% \\) efficient.\nPractice: **bootstrap it** (t13) — this is the canonical “no clean formula” example.",
+pages:["**Where the formula comes from.** \\( \\mathbb{P}(\\hat m \\le x) \\) is a binomial statement about how many observations fall below x; apply the CLT to that count and the delta method through the CDF: the derivative \\( f(m) \\) appears in the denominator — flat density at the center = wobbly median.\nThe trade being priced: the median throws away magnitude information (hence the \\( 2/\\pi \\)) and buys a **50% breakdown point** versus 0% for the mean. Robustness is never free; here is its exact price tag."]},
+
+{id:"t26",cat:"stats",type:"question",diff:2,title:"Delta method, applied",
+body:"X̄ is the mean of n iid samples with mean μ and variance σ². Give the asymptotic variances of \\( \\bar X^2 \\) and of \\( 1/\\bar X \\). Any warnings?",
+answer:"\\( g(\\bar X) \\) has asymptotic variance \\( g'(\\mu)^2\\sigma^2/n \\):\n**\\( \\bar X^2 \\)** → \\( 4\\mu^2\\sigma^2/n \\).  **\\( 1/\\bar X \\)** → \\( \\sigma^2/(\\mu^4 n) \\).\nWarnings: \\( 1/\\bar X \\) detonates as μ → 0 (the linearization has nothing to hold onto), and if \\( g'(\\mu) = 0 \\) the first-order term dies — different limit, different rate.",
+pages:["**The degenerate case, since they will ask.** If \\( g'(\\mu)=0 \\) (e.g. \\( g(x)=x^2 \\) at μ = 0): \\( n\\,g(\\bar X) \\to \\tfrac{\\sigma^2}{2}g''(\\mu)\\,\\chi^2_1 \\)-type limits — rate n, not √n, and a skewed distribution.\nFinance sighting: variance of estimated *ratios* (Sharpe = mean/vol) is delta method with two moving parts — the classic \\( \\operatorname{Var}(\\widehat{SR}) \\approx \\tfrac{1 + SR^2/2}{n} \\) formula is exactly this machinery."]},
+
+{id:"t27",cat:"stats",type:"question",diff:2,title:"Why does lasso hit exact zeros?",
+body:"Ridge shrinks coefficients; lasso *kills* some outright. Explain precisely why — geometry and formula.",
+answer:"**Geometry**: minimize the loss over \\( \\|\\beta\\|_1 \\le t \\): the ℓ¹ ball is a diamond with **corners on the axes**; expanding loss contours typically touch a corner first → exact zeros. The ℓ² ball is smooth — tangency almost never lands on an axis.\n**Formula** (orthonormal design): lasso soft-thresholds \\( \\hat\\beta_j = \\operatorname{sign}(z_j)(|z_j| - \\lambda)^+ \\); ridge rescales \\( z_j/(1+\\lambda) \\). A threshold versus a haircut.",
+pages:["**Third reading: priors.** Lasso = MAP with **Laplace** prior (sharp peak at 0 — mass insists on exact sparsity); ridge = MAP with **Gaussian** prior (round shoulders — shrink everything, kill nothing).\nPractical corollaries: lasso struggles with correlated groups (picks one arbitrarily — elastic net exists for this), and the λ that predicts best is not the λ that selects variables best. Two goals, two tunings."]},
+
+{id:"t28",cat:"stats",type:"question",diff:3,title:"The best possible test",
+body:"Simple H₀ vs simple H₁. What is the most powerful test at level α — and why can nothing beat it?",
+answer:"**Neyman–Pearson**: reject when the likelihood ratio \\( \\tfrac{f_1(x)}{f_0(x)} \\) exceeds a threshold chosen to make the size α. Full stop.\nWhy optimal: any competitor of the same size must swap some high-ratio region for low-ratio region — each swap buys equal H₀-probability but strictly less H₁-probability. An exchange argument, not magic.",
+pages:["**The recipe at scale.** Composite hypotheses → the likelihood-**ratio test** statistic \\( \\Lambda = 2(\\ell_1 - \\ell_0) \\), and **Wilks**: under H₀, \\( \\Lambda \\to \\chi^2_k \\) with k = number of restrictions — the engine behind half of applied testing.\nQuant echo: “is the more complex model worth it?” = LRT; and the exchange argument is literally portfolio optimization — spend your α-budget where the likelihood ratio (edge per unit of size) is highest."]},
+
+{id:"t29",cat:"stats",type:"question",diff:2,title:"When the bootstrap lies",
+body:"The bootstrap is your default for hard standard errors (t25). Name the situations where it quietly fails — with the canonical example.",
+answer:"Fails for: **extremes** (max/min), **heavy tails** (infinite variance), **dependent data** (need block bootstrap), boundary parameters, and tiny n.\nCanonical: bootstrapping the **maximum** — the resampled max equals the sample max with probability \\( 1-(1-\\tfrac1n)^n \\to 1 - e^{-1} \\approx 63\\% \\): a spike, not the true extreme-value distribution.",
+pages:["**Why extremes break it.** The bootstrap world's support ends at the observed max — it cannot imagine anything larger, but the true sampling distribution of the max lives exactly there. (Same 63% as the “fraction of distinct cards in a resample” fact — one identity, two costumes.)\nFixes worth naming: m-out-of-n bootstrap, parametric bootstrap with a fitted tail (EVT), block/stationary bootstrap for time series. “Bootstrap, but check the regularity conditions” is the senior answer."]},
+
+{id:"t30",cat:"stats",type:"question",diff:2,title:"The peeking problem",
+body:"Your A/B test dashboard updates live and you will “just stop when it hits p < 0.05.” What is wrong, how bad is it, and what are the honest fixes?",
+answer:"Each peek is another chance for noise to cross the line: **type I error inflates** — ~14% with five looks, and with unlimited peeking a null result is *guaranteed* to look significant eventually (law of the iterated logarithm: the z-stat crosses any fixed bar infinitely often).\nFixes: fix n in advance; **alpha-spending** boundaries (O'Brien–Fleming); or always-valid inference (e-values / confidence sequences).",
+pages:["**The martingale reading.** “Test until significant, then stop” is the doubling strategy (s07) in statistical clothing — optional stopping cashing in on fluctuations. The cure is the same mathematics: e-values are nonnegative supermartingales (a test *is* a bet against H₀), and Ville's inequality is what makes stopping anytime legal.\nYour StatApp conformal work lives next door: validity guarantees that survive adaptivity are the whole modern game."]},
+
+{id:"ml19",cat:"mlai",type:"question",diff:2,title:"Logistic regression, from scratch",
+body:"Write the loss for logistic regression, derive its gradient, and explain why nobody fits it with squared error.",
+answer:"NLL: \\( -\\sum_i [y_i\\log p_i + (1-y_i)\\log(1-p_i)] \\), \\( p_i = \\sigma(x_i^\\top\\beta) \\).\nGradient: \\( \\nabla = X^\\top(p - y) \\) — residuals times features, formally identical to OLS's normal equations. **Convex** (Hessian \\( X^\\top W X \\succeq 0 \\)).\nSquared error + sigmoid = non-convex with saturated, vanishing gradients — and it is not the right likelihood for Bernoulli data anyway.",
+pages:["**The failure they love to ask.** Perfectly separable classes: the likelihood keeps improving as \\( \\|\\beta\\| \\to \\infty \\) — coefficients diverge, fitted probabilities go to 0/1. Cure: regularization (a Gaussian/Laplace prior makes the MAP finite).\nBonus identity: the gradient form \\( X^\\top(p-y) \\) is why logistic regression is a one-layer neural net with cross-entropy — same update, smaller wardrobe."]},
+
+{id:"ml20",cat:"mlai",type:"question",diff:2,title:"The kernel trick, in one line",
+body:"State the kernel trick precisely. What condition must k satisfy, and what is the catch?",
+answer:"Any algorithm that touches data **only through inner products** can replace \\( \\langle x, x'\\rangle \\) by \\( k(x,x') = \\langle \\phi(x), \\phi(x')\\rangle \\) — computing in a huge (even infinite) feature space without ever building φ.\nCondition: k **positive semidefinite** (Mercer) — every Gram matrix ⪰ 0.\nCatch: you now pay in n, not d — \\( O(n^2) \\) Gram matrices, \\( O(n^3) \\) solves.",
+pages:["**Concrete instances.** RBF kernel = infinite-dimensional feature map; SVM dual sees only the Gram matrix; kernel ridge regression = GP posterior mean (ml01) — one identity connecting three courses.\nThe honest limitation: kernels stopped scaling, which is (part of) why deep nets — *learned* feature maps φ — took over when n exploded. Say both halves and you sound like you were there."]},
+
+{id:"ml21",cat:"mlai",type:"question",diff:2,title:"What does AUC actually measure?",
+body:"Define ROC-AUC in one sentence — the probabilistic one. When is it the wrong metric?",
+answer:"AUC = \\( \\mathbb{P}(\\text{score of a random positive} > \\text{score of a random negative}) \\) — pure **ranking** quality, threshold-free (it is the normalized Mann–Whitney U).\nWrong metric when: classes are heavily imbalanced and you care about precision (use PR curves), when **calibration** matters (sizing! — ml15), or when only one operating threshold will ever be used.",
+pages:["**Why imbalance fools ROC.** FPR divides by the (huge) negative class: 1000 false alarms among 10⁶ negatives is FPR 0.1% — the ROC looks angelic while precision is garbage. PR curves divide by *your alerts*, which is what a desk experiences.\nInterview crisp: “AUC answers *can it rank*; calibration answers *can I trust the number*; precision answers *can I act on it*. Three different questions.”"]},
+
+{id:"ml22",cat:"mlai",type:"question",diff:2,title:"k-means vs GMM",
+body:"Compare k-means and Gaussian mixtures: objectives, algorithms, and the exact sense in which one is a special case of the other.",
+answer:"k-means minimizes within-cluster sum of squares via hard assign–update; GMM maximizes likelihood via **EM** with soft responsibilities, learning weights and covariances.\nThe bridge: k-means is EM on a GMM with **equal spherical covariances in the limit σ → 0** — responsibilities harden into nearest-centroid assignments.",
+pages:["**What each buys you.** GMM: ellipsoidal clusters, soft memberships (useful downstream), a likelihood for model selection — at the price of more parameters and degenerate traps (a component collapsing onto one point: likelihood → ∞; fix with covariance floors/priors).\nk-means: fast, simple, but scale-sensitive (standardize!) and init-sensitive — **k-means++** seeding is the two-line fix that makes it respectable. EM's guarantee, for either: the objective improves monotonically every iteration; convergence to *local* optima only."]},
+
+{id:"ml23",cat:"mlai",type:"question",diff:3,title:"99% accuracy, 1% positives",
+body:"Your fraud model reports 99% accuracy on a dataset with 1% fraud. The PM is thrilled. Walk through what you check and what you change.",
+answer:"“Always predict clean” scores 99% — accuracy is **vacuous** here.\nCheck: confusion matrix, precision/recall at realistic thresholds, PR-AUC, calibration.\nChange: pick the threshold from **costs** (missed fraud vs false alarm), reweight the loss or resample — and evaluate on the metric the business actually pays.",
+pages:["**Two equivalences worth stating.** (1) Moving the decision threshold ≡ changing class weights in the loss — pick whichever is operationally cleaner, they trace the same frontier. (2) Resampling tricks (SMOTE & co.) must live *inside* the CV folds (ml09) or you synthesize leakage — a beautifully modern way to fake a result.\nEnd on: with 1% base rates, even a good model yields mostly false alarms at high recall (t07's arithmetic) — the honest deliverable is a precision–recall *menu*, priced in analyst hours."]},
+
+{id:"ml24",cat:"mlai",type:"question",diff:3,title:"Condition a Gaussian",
+body:"X = (X₁, X₂) jointly Gaussian. State the distribution of X₁ given X₂ = x₂ — the formula an entire industry runs on.",
+answer:"\\[ X_1 \\mid X_2{=}x_2 \\;\\sim\\; \\mathcal{N}\\big(\\mu_1 + \\Sigma_{12}\\Sigma_{22}^{-1}(x_2 - \\mu_2),\\; \\Sigma_{11} - \\Sigma_{12}\\Sigma_{22}^{-1}\\Sigma_{21}\\big). \\]\nMean: linear in the observation (the regression). Covariance: prior minus explained — the **Schur complement**, and it does not depend on x₂.\nThis single identity *is* GP regression (ml01), the Kalman filter update, and Gaussian imputation.",
+pages:["**How to re-derive it under pressure.** Write the joint density, complete the square in x₁; or cleaner: \\( X_1 - \\Sigma_{12}\\Sigma_{22}^{-1}X_2 \\) is uncorrelated with X₂ (check it), hence independent (Gaussian!), hence its conditional = its marginal — read off mean and variance. Two lines, no matrix inversion lemma heroics.\nThe interview kicker: “variance shrinks by \\( \\Sigma_{12}\\Sigma_{22}^{-1}\\Sigma_{21} \\) whatever we observe” — information reduces uncertainty deterministically in Gaussian land; only the *location* is data-dependent. That is why GP error bars (ml01) ignore y."]}
+
+]);
+
+/* =========================================================================
+   PACK: STATS/ML INTUITION (in) — new category, zero calculation required.
+   Verbal reasoning drills: model knowledge, diagnosis, interview intuition.
+   ========================================================================= */
+window.FEED_ITEMS = window.FEED_ITEMS.concat([
+
+{id:"in01",cat:"intuition",type:"question",diff:2,title:"Great in-sample, dead out-of-sample",
+body:"Your model shines in backtest, flops live. Walk the interviewer through your differential diagnosis — in the order you would actually check.",
+answer:"Cheapest and most damning first: **(1) plumbing bug** (misaligned dates, wrong labels), **(2) leakage** — “too good to be true” in-sample is its signature, **(3) overfitting** (was train already ≫ validation?), **(4) selection bias** — you picked this model among many tries, **(5) regime change** — the world moved.\nA diagnosis, not a shrug: each cause leaves different fingerprints.",
+pages:["**The fingerprints.** Leakage: eerily good backtest, collapse *exactly* at deployment. Overfit: the train/validation gap was visible before you looked away. Selection: great chosen run, mediocre siblings. Drift: worked live for a while, then faded gently.\nAsking “which failure signature do I see?” instead of “why is ML hard?” is the difference the interviewer is listening for."]},
+
+{id:"in02",cat:"intuition",type:"question",diff:1,title:"Overfitting, for a PM",
+body:"Explain overfitting to a portfolio manager — no math allowed. Then: how do you *detect* it?",
+answer:"It is **memorizing past answers instead of learning the subject**: a tailor fitting a suit to every wrinkle of one mannequin — perfect on the mannequin, absurd on a human.\nDetection: grade the model on questions it has never seen (held-out data, later periods), and watch the gap between “knows the past” and “predicts the future”.",
+pages:["**The two dials.** Flexibility of the model vs amount of data: a very flexible model with little data *will* stitch itself to noise. You fix it by adding data, removing flexibility, or forbidding overconfidence (regularization).\nThe PM-grade test: “would this rule have survived a year it has never met?” If nobody can answer, that is the answer."]},
+
+{id:"in03",cat:"intuition",type:"question",diff:2,title:"Why ensembles work — and when they don't",
+body:"Averaging several models usually beats each one. Why? And in what situation does averaging buy you nothing?",
+answer:"Because models that are wrong **in different ways** partially cancel each other's errors — wisdom of crowds, applied to algorithms.\nIt buys nothing when the errors are **shared**: same leaky feature, same biased data, same blind spot. Averaging correlated mistakes averages the mistake, not away.",
+pages:["**Where diversity actually comes from.** Different data slices (bagging), different features, different model families, different horizons, even different random seeds — each is a lever for decorrelating errors.\nAnd the quant echo: a portfolio of strategies obeys the same law. Ten copies of the same bet is one bet with confidence issues."]},
+
+{id:"in04",cat:"intuition",type:"question",diff:2,title:"More data or better model?",
+body:"You can spend a month collecting more data or a month improving the model. How do you decide — from the couch, without running anything?",
+answer:"Diagnose which regime you are in. Model already fits training **poorly** → you are bias-limited: more data repeats the same mistake in higher resolution; improve the model/features.\nTraining great but validation lags → variance-limited: **more data** (or regularization) is the medicine.\nThought experiment: “if the dataset doubled, would validation move?” Your honest guess is the answer.",
+pages:["**Learning curves, imagined.** Picture train and validation error as data grows: converging *high* = a ceiling (bias — the model cannot express the truth); a persistent *gap* = thirst (variance — it could, with more examples).\nThird option people forget: **better data** — cleaner labels, smarter coverage — often beats both."]},
+
+{id:"in05",cat:"intuition",type:"question",diff:1,title:"Defend regularization",
+body:"“Your regularized model fits the training data *worse*. Why would I want that?” Answer the PM.",
+answer:"Training error measures memory; we are paid for the **next** exam. Regularization forbids the model from believing one dataset too hard — it gives up a little truth-fitting to refuse a lot of noise-fitting.\nIf validation improves while training worsens, that is not a bug. That is the entire point, working.",
+pages:["**One idea, five costumes.** Penalties, priors, early stopping, dropout/noise, data augmentation — all say the same sentence: “stay simple unless the evidence insists.”\nRecognizing them as one idea is what separates “knows the tricks” from “understands the principle” in an interview."]},
+
+{id:"in06",cat:"intuition",type:"question",diff:2,title:"You added a feature; test got worse",
+body:"A new feature improved validation, then test performance dropped. Give three mechanisms — no formulas.",
+answer:"**(1) It is noise wearing a costume**: extra flexibility for the model to hallucinate patterns.\n**(2) Multiple testing**: you auditioned many features; this one won validation by luck, and luck does not generalize.\n**(3) Hygiene breach**: the feature (or its preprocessing) peeked at data it should not have — validation was flattered, test tells the truth.",
+pages:["**The entry policy that survives.** A feature earns its seat with: improvement that is *stable* across folds and periods, a reason to exist (an economic or causal story), and survival after its correlated cousins are removed.\n“Every feature is guilty until proven robust” is the tone that gets you hired."]},
+
+{id:"in07",cat:"intuition",type:"question",diff:2,title:"“Correlation 0.9 — they move together”",
+body:"Daily correlation between two assets is 0.9. A colleague concludes they basically move together, so one hedges the other. Push back, purely with reasoning.",
+answer:"Three pushbacks: correlation is **horizon-specific** (0.9 daily says little about weeks or years); it is an **average over calm days** — the hedge is needed precisely in the tail, where correlations famously misbehave; and correlation ignores **magnitude** — moving together in sign is not moving together in size.\nAlso: measured on the past. Regimes expire.",
+pages:["**Two mental images.** Crisis: “all correlations go to one” — diversification evaporates when you need it. And the drunk with a dog: they wander apart step by step (weak short-horizon link) yet never separate (tied at long horizon) — or the reverse: high daily correlation while slowly drifting apart in levels.\nSign co-movement, size co-movement, level co-movement: three different claims. Say which one you mean."]},
+
+{id:"in08",cat:"intuition",type:"question",diff:2,title:"Accuracy 90% or honest 60%?",
+body:"Model A: 90% accuracy. Model B: probabilities that are only 60% confident but perfectly **calibrated**. Which do you want on a trading desk, and why?",
+answer:"For **sizing**, B. A desk does not act on labels, it acts on *how much* — and betting size needs probabilities you can take literally. A calibrated 60% is a tradable edge with a known size; an uncalibrated 90% cannot tell you how hard to press, and may be a base-rate illusion anyway.\nA is fine only when the action is binary and mistakes cost the same in both directions.",
+pages:["**Two separate skills.** Discrimination: can it *rank* good vs bad? Calibration: can I *trust the number*? A model can ace one and flunk the other.\nDesk translation: discrimination finds the trade, calibration sizes it. Ask which one a metric measures before worshiping it."]},
+
+{id:"in09",cat:"intuition",type:"question",diff:2,title:"“Down three days — a bounce is due”",
+body:"Respond to: “the market fell three days in a row, so statistically a rebound is due.”",
+answer:"If daily moves are roughly independent, that is the **gambler's fallacy** — the market keeps no fairness debt; the coin does not remember.\n“Due” is only meaningful with a **mechanism**: forced flows, overreaction, a finite pool being drawn down. That is an empirical claim about *this* horizon, to be argued with evidence — never with the arithmetic of fairness.",
+pages:["**The clean separation.** Ask: “is there a reason returns should anticorrelate at this horizon?” — sometimes yes (microstructure bounce, panic reversal), often no.\nAnd do not confuse it with regression to the mean: *measured extremes* revert because measurements contain luck (in10) — that is about noise in the ruler, not memory in the market."]},
+
+{id:"in10",cat:"intuition",type:"question",diff:1,title:"The star manager's second year",
+body:"A fund returns +40% and tops the rankings; next year it is mediocre. “He lost his touch”?",
+answer:"Probably not — **regression to the mean**. Topping the rankings selects for skill *and* a lucky draw; next year keeps the skill and redraws the luck. The extraordinary part was partly noise, and noise does not renew its subscription.\nNo touch was lost. The luck simply went home.",
+pages:["**Same pattern, everywhere.** Sophomore slump, the magazine-cover curse, the best backtest decaying live, tall fathers' shorter sons — select on an extreme outcome and the sequel disappoints by construction.\nProtective habits: judge process over outcome, use windows long enough for skill to outvote luck, and expect your own champion strategy to obey the same law (in21)."]},
+
+{id:"in11",cat:"intuition",type:"question",diff:3,title:"Winning every sector, losing overall",
+body:"A strategy is profitable within every single sector, yet the total book loses money. Possible? What is going on?",
+answer:"Possible — **Simpson's paradox** in the wild. The aggregate mixes in something no sector sees: shifting weights over time (big exposure exactly in the bad periods), or a cross-sector timing/allocation effect. Per-group truths do not sum to the aggregate truth when the *mixture* itself is doing the damage.\nCheck: re-run attribution with weights held fixed; slice by time.",
+pages:["**The universal vaccine.** Whenever group-level and aggregate conclusions disagree, ask: *what is the aggregate holding constant that the groups are not?* — usually the answer is “the weights,” and the weights are a decision someone made.\nSame paradox runs through admissions data and medical trials; recognizing it across costumes is the skill."]},
+
+{id:"in12",cat:"intuition",type:"question",diff:2,title:"“Top feature ⇒ let's trade it”",
+body:"Your model says X is its most important feature. The PM proposes trading on X directly. What do you say?",
+answer:"Importance measures the **model's reliance**, not the world's mechanism. X may be a proxy riding a correlation; its twin features may have split the credit arbitrarily; its usefulness may be one regime deep.\nAnd trading X naked throws away the rest of the model — the ensemble of conditions under which X meant something.",
+pages:["**What would upgrade the claim.** Stability of X's role across periods; the model still works when X's correlated cousins are removed; an economic story for *why* X should matter; ideally, some natural experiment.\nOne sentence to keep: “the model tells you where it looks, not why the world moves.”"]},
+
+{id:"in13",cat:"intuition",type:"question",diff:1,title:"Why nonlinearities?",
+body:"Why do neural networks need nonlinear activations at all?",
+answer:"Because a stack of linear layers **collapses into one linear layer** — depth would add parameters and no expressiveness. The nonlinearity lets each layer bend space, so later layers can compose and reuse what earlier layers built.\nMental image: folding a sheet of paper so that far-apart points end up neighbors — linear maps can stretch and rotate the sheet, only folds change what is reachable.",
+pages:["**Then why depth, not just width?** Composition: edges → textures → parts → objects. Reusing sub-features across a hierarchy is exponentially more economical than building every concept from scratch in one wide layer.\nDepth is a prior that the world is compositional — which, conveniently, it is."]},
+
+{id:"in14",cat:"intuition",type:"question",diff:2,title:"Why does dropout work?",
+body:"Randomly deleting neurons during training sounds like sabotage. Why does it *help*?",
+answer:"It forbids **co-dependence**: no neuron can rely on a specific partner being present, so features must be individually meaningful and redundant — a team where anyone might be absent trains generalists.\nSecond reading: each step trains a different thinned sub-network; testing with all neurons is like averaging that whole implicit **ensemble** (in03, for free).",
+pages:["**The family resemblance.** Dropout is noise-as-regularizer — same clan as data augmentation, SGD noise, and bagging. All inject controlled randomness so the model cannot memorize one brittle pathway.\nCaveats worth saying: less useful in small networks and some modern architectures — a tool, not a sacrament."]},
+
+{id:"in15",cat:"intuition",type:"question",diff:2,title:"Nearest neighbors in 1000 dimensions",
+body:"kNN works nicely in 2D. What quietly breaks in very high dimensions?",
+answer:"The **curse of dimensionality**: with many dimensions, everyone is roughly equally far from everyone — distances concentrate, and “nearest” stops carrying information. Data also becomes hopelessly sparse: locality dies because no one has neighbors.\nFixes: reduce dimensions, learn a metric, or use models whose structure replaces raw proximity.",
+pages:["**Two images to keep.** In high-D, volume flees to the corners and shells — the “center” is empty; and to maintain the same local density, the data requirement grows *exponentially* with dimension.\nDeep learning's answer: learn a low-dimensional representation where proximity means something again — kNN in a learned space is suddenly respectable."]},
+
+{id:"in16",cat:"intuition",type:"question",diff:2,title:"Why three datasets?",
+body:"Train, validation, test: why the three-way split — and what exactly dies the day you tune on test?",
+answer:"Validation is the set you are **allowed to consult repeatedly** — and each consultation burns it a little, because you are slowly fitting its noise. Test exists to answer one question, once: “what happens on data nobody optimized against?”\nTune on test and that question becomes unanswerable — your estimate turns into hand-picked luck, and you will meet reality unarmed.",
+pages:["**Why peeking burns.** Every adaptive look is another lottery ticket on the validation noise — pick the best of many looks and you have selected noise (in21's logic). Hence rituals: touch test once, lock away holdout years, pre-register the final run.\nHygiene sounds bureaucratic until the day it is the only thing between you and a fictional Sharpe."]},
+
+{id:"in17",cat:"intuition",type:"question",diff:2,title:"Backtest Sharpe: 3",
+body:"A junior shows you a backtest with Sharpe 3. What runs through your head, in order?",
+answer:"The craft's prior: **extraordinary Sharpe is ordinary bug**. In order: lookahead/leakage, costs and impact ignored, survivorship in the data, selection (best of how many tries?), a short or freakish window, and only then — maybe — an edge.\nCongratulations come after the autopsy, not before.",
+pages:["**What would actually move you.** Honest costs and capacity; robustness across time slices and parameter neighborhoods; the *other* trials disclosed; out-of-sample periods never touched; and best of all, live or paper trading.\nSay “great — let's try to kill it” and you have given the correct answer in four words."]},
+
+{id:"in18",cat:"intuition",type:"question",diff:2,title:"The prosecutor's fallacy",
+body:"“The evidence would occur in only one innocent person in a million — so the defendant is almost surely guilty.” Locate the flaw, using nothing but reasoning.",
+answer:"It swaps two different questions: *how rare is the evidence if innocent* versus *how likely is innocence given the evidence*. In a city of ten million, one-in-a-million rarity still means a handful of innocent matches — the defendant is one of several candidates, not a certainty.\n**Denominators first**: how many people could this filter have caught?",
+pages:["**The same swap, in your world.** Medical tests read on healthy populations (t07), and backtests read as “the strategy is 99.9% real” (t21) — all confuse the rarity of a coincidence with the probability of the story.\nThe portable reflex: before believing any striking match, count the crowd it was fished from."]},
+
+{id:"in19",cat:"intuition",type:"question",diff:2,title:"Conditional independence, one story",
+body:"Explain conditional independence with a single everyday story — and name the reverse trap.",
+answer:"Ice cream sales and drownings rise and fall together — but *given that it is summer*, knowing ice cream sales tells you nothing new about drownings. A **common cause** made them look connected; conditioning on it dissolves the link.\nReverse trap: conditioning can also **create** dependence — among celebrities (selected for fame), talent and looks become negatively related, because either one suffices to get in.",
+pages:["**Why this one story carries so far.** “What should I control for?” is the whole art of regression and causal graphs: condition on common causes (good), do not condition on common *effects* — selection — (bad, and everywhere: hired candidates, surviving funds, published results).\nMost data you will ever see was conditioned on survival before it reached you."]},
+
+{id:"in20",cat:"intuition",type:"question",diff:2,title:"Sell a prior to a frequentist",
+body:"Your PM distrusts “Bayesian assumptions.” With 30 data points on a new product, defend using a prior — verbally.",
+answer:"With 30 points, “no assumptions” is itself an assumption: that this tiny sample deserves total trust. A prior is domain knowledge made **explicit and arguable** — it stabilizes wild estimates by pulling them toward what similar situations have taught us.\nAnd they already believe in priors: the regularization in every model they approve *is* one, wearing a lab coat.",
+pages:["**Borrowing strength, the honest pitch.** Early-season batting averages predicted better by blending with the league average; a new strategy's Sharpe blended with the family of similar strategies. Shrinkage wins precisely when data is thin and estimates are many.\nThe honest caveat to volunteer: priors move answers — so show the sensitivity. Transparency is what makes it science rather than opinion."]},
+
+{id:"in21",cat:"intuition",type:"question",diff:2,title:"Best of 100, p < 0.001",
+body:"“We screened 100 signals; the winner is significant at 0.1%.” Why is that still suspect — no formulas allowed?",
+answer:"Because the p-value pretends this signal was the **only one auditioned**. Pick the best of a hundred noisy tries and it will look extreme *by construction* — you measured the champion of luck with a ruler built for a single pre-registered idea.\nWhat matters is the false-alarm rate of the **procedure** — “screen many, keep the max” — not of the survivor.",
+pages:["**Cures, in order of honesty.** Disclose all trials; penalize the search; and above all re-test the champion on data the contest never touched — expecting some decay (the winner's curse of research).\nThis is in10's regression to the mean pointed at yourself: your best idea was partly lucky *because you selected it*."]},
+
+{id:"in22",cat:"intuition",type:"question",diff:1,title:"Exploration vs exploitation, at dinner",
+body:"Explain the exploration–exploitation trade-off with a restaurant story, and state when to lean each way.",
+answer:"Your favorite restaurant is a guaranteed 8/10; the new place is unknown — probably worse, possibly a 10. Exploiting eats well tonight; exploring buys **information** that pays over every future dinner.\nLean exploratory when horizons are long and uncertainty is high; lean exploitative as time runs short or knowledge saturates. Rule of thumb: be optimistic about what you have not tried — try things whose *plausible* best case is high.",
+pages:["**Where the same trade lives.** Bandits and UCB (your CREST summer — optimism formalized), Bayesian optimization's acquisition functions, hiring, research portfolios, even careers.\nHuman failure modes, both directions: settling too early on a “good enough” option, or novelty-chasing forever without cashing in. The math exists precisely because instinct picks wrong."]},
+
+{id:"in23",cat:"intuition",type:"question",diff:2,title:"GP or neural net?",
+body:"You get one modeling tool for the task. Talk through when you reach for a Gaussian process and when for a neural network — decision logic only.",
+answer:"**GP** when data is small or expensive, the function is smooth-ish, and you need uncertainty you can *act on* — active learning, Bayesian optimization, risk-aware decisions.\n**Neural net** when data is huge and raw (images, text, order flow) and the features themselves must be learned.\nThe deciding questions: how many points, how weird the inputs, and does anyone downstream consume error bars?",
+pages:["**Middle grounds worth naming.** Deep kernel learning (net learns the representation, GP supplies the uncertainty), ensembles for rough NN uncertainty, and the honest observation that in low data the GP's assumptions *are* the information.\nInterview finisher: “the GP's chief export is calibrated doubt; the net's is learned representation. I choose by which one the problem is starving for.”"]},
+
+{id:"in24",cat:"intuition",type:"question",diff:1,title:"Why quants live in logs",
+body:"Why do returns, prices, and half of quant life get log-transformed? Explain without writing a formula.",
+answer:"Because markets are **multiplicative**: what matters is “up 2%”, not “up 2 dollars”, and doubling is the same event at any level. Logs turn multiplication into addition — compounding becomes stacking, percentage thinking becomes linear thinking.\nBonus effects: big and small values share one scale, up and down moves become symmetric, and variance stops growing with the level.",
+pages:["**When not to log.** True zeros or negatives, genuinely additive quantities, and when stakeholders need answers in level units.\nAnd the mental-math tie-in: thinking in logs is what makes orders-of-magnitude estimation (mm12) and calibrated intervals (mk08) feel easy — one habit feeding three skills."]},
+
+{id:"in25",cat:"intuition",type:"concept",diff:2,title:"The map of model families",
+body:"Four kingdoms, one line each.\n**Linear**: additive dose–response; extrapolates; readable.\n**Trees**: thresholds and interactions; scale-proof; cannot extrapolate.\n**Kernels/GP**: similarity plus smoothness; honest uncertainty; chokes on huge n.\n**Nets**: learned features; insatiable for data; unbeatable on raw perception.\nModel choice = matching the family's **prejudice** to the problem's shape.",
+pages:["**Each kingdom's signature failure.** Linear misses interactions and curves; trees staircase smooth trends and freeze outside the data's range; kernels melt computationally as n grows; nets hallucinate confidently when data is thin.\nSaying the failure modes unprompted is what makes “which model would you use?” a conversation instead of a quiz."]},
+
+{id:"in26",cat:"intuition",type:"concept",diff:2,title:"The leakage bestiary",
+body:"Five ways the future sneaks into training:\n**Target leakage** — a feature secretly contains the answer.\n**Temporal** — information stamped after the prediction moment.\n**Preprocessing** — statistics computed on all the data, splits included.\n**Group** — the same entity strays across train and test.\n**Near-duplicates** — the test question was in the textbook.\nThe universal tell: results too good, then live disappointment.",
+pages:["**Habits that keep you clean.** Split *first*, then do everything inside; timestamp every field; and interrogate each feature with one question: “would I truly know this at prediction time?”\nLeakage is the most common cause of fictional alpha in the wild — which makes this checklist, verbatim, a strong interview answer."]},
+
+{id:"in27",cat:"intuition",type:"concept",diff:2,title:"Learning curves as X-ray",
+body:"Imagine error versus training-set size, two curves: train and validation.\nCurves **converge but high** → bias: the model has hit its ceiling; more data just repeats the lesson. Get a richer model or better features.\nCurves **gapped** → variance: the model is thirsty; more data (or regularization) closes the gap.\nOne imagined plot answers “what should I do next?”",
+pages:["**Second readings.** The slope of the validation curve says whether data still pays — flat means stop collecting and start inventing. The same X-ray works with capacity on the x-axis: watch where validation turns back up.\nLearning curves are the cheapest honest advisor a modeler has; most people never draw them."]},
+
+{id:"in28",cat:"intuition",type:"concept",diff:2,title:"Three kinds of not-knowing",
+body:"**Aleatoric**: the world's own dice — irreducible; more data will not shrink it.\n**Epistemic**: your ignorance — shrinks with data, screams in regions you have never visited.\n**Model**: the family itself is wrong — no amount of data within the family fixes it.\nDecisions treat them differently: diversify against the first, learn against the second, stay humble (ensembles, stress tests) against the third.",
+pages:["**Desk translation.** Aleatoric = position sizing and diversification; epistemic = trade smaller where the model has never been, and go collect that data; model = why disagreeing models are information, not annoyance.\nA forecast that cannot say *which kind* of uncertain it is will be trusted exactly once."]},
+
+{id:"in29",cat:"intuition",type:"concept",diff:2,title:"Reading residuals like tea leaves",
+body:"Your errors are the model whispering what it lacks.\nErrors grow with the level → the world is multiplicative; think logs.\nErrors clump in time → missing dynamics or regimes.\nErrors tilt along some variable → a feature or a curve you refused to add.\nA few monstrous errors → heavy tails; robustify before averaging.",
+pages:["**The meta-habit.** Always study *where* you are wrong, not just how much: error autopsies beat metric worship, and every pattern in residuals is a to-do item wearing a disguise.\nThe interview version: “after fitting, the first thing I look at is the structure of my mistakes.” Few juniors say it; all seniors do it."]},
+
+{id:"in30",cat:"intuition",type:"concept",diff:2,title:"Nonstationarity survival kit",
+body:"The world drifts; your model is a perishable good.\nKit: weight recent data more; evaluate on **rolling** windows, never one golden split; add regime awareness; keep an ensemble across lookbacks; and monitor live-versus-backtest as a standing ritual.\nThe meta-skill is not the model — it is the **pipeline that notices decay**.",
+pages:["**The mindset shift.** Amateurs ask “what is the best model?”; professionals ask “how will I know when it stops working, and what retires it?” Expected lifespan, monitoring, and graceful retirement are part of the design, not an afterthought.\nSay “every signal decays; my job is to notice early” and you have compressed a decade of desk wisdom into one sentence."]}
+
+]);
