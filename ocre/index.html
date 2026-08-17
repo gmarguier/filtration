@@ -1,0 +1,1031 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0C2318">
+<title>OCRE · Prépa physique tennis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800&family=Spline+Sans+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bache:#0C2318;        /* vert bâche de fond de court */
+  --bache-2:#12301F;
+  --bache-3:#1A4029;
+  --line:#25523A;
+  --craie:#F1ECDF;        /* lignes tracées à la craie */
+  --craie-dim:#9DB3A2;
+  --ocre:#C05F2E;         /* brique pilée */
+  --ocre-deep:#9E4A21;
+  --ocre-light:#D97E4B;
+  --balle:#CBDF3C;        /* feutre de balle neuve */
+  --balle-ink:#13260F;
+  --sauge:#7FB08A;        /* phase récup */
+  --danger:#D96A4B;
+  --radius:12px;
+  --maxw:560px;
+  --mono:'Spline Sans Mono',ui-monospace,monospace;
+  --sans:'Archivo',system-ui,sans-serif;
+  --display:'Anton',impact,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:var(--sans);
+  background:var(--bache);
+  color:var(--craie);
+  min-height:100dvh;
+  background-image:
+    radial-gradient(120% 60% at 50% -10%, rgba(203,223,60,.05), transparent 60%),
+    repeating-linear-gradient(0deg, transparent 0 7px, rgba(241,236,223,.015) 7px 8px);
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer;touch-action:manipulation}
+button:focus-visible,a:focus-visible{outline:2px solid var(--balle);outline-offset:2px;border-radius:6px}
+svg{display:block}
+.hidden{display:none!important}
+
+/* ---------- layout ---------- */
+#main{max-width:var(--maxw);margin:0 auto;padding:20px 18px calc(96px + env(safe-area-inset-bottom))}
+.view{animation:fade .22s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ---------- type ---------- */
+.eyebrow{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--craie-dim)}
+.eyebrow.balle{color:var(--balle)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(58px,19vw,86px);line-height:.95;letter-spacing:.01em;margin:6px 0 4px}
+h1 .dot{color:var(--ocre-light)}
+h2{font-family:var(--display);font-weight:400;font-size:26px;letter-spacing:.02em;line-height:1.05}
+.hero{margin-bottom:26px}
+.hero-sub{color:var(--craie-dim);font-size:15px;max-width:34ch}
+.section-title{font-family:var(--display);font-size:20px;letter-spacing:.03em;margin:26px 0 12px;display:flex;align-items:baseline;gap:10px}
+.section-title small{font-family:var(--mono);font-size:11px;color:var(--craie-dim);letter-spacing:.1em}
+
+/* ---------- last session ---------- */
+.last{margin-top:14px;padding:10px 12px;border:1px dashed var(--line);border-radius:10px;font-family:var(--mono);font-size:12px;color:var(--craie-dim);display:inline-block}
+.last b{color:var(--craie);font-weight:500}
+
+/* ---------- workout cards ---------- */
+.wcard{
+  width:100%;text-align:left;display:grid;grid-template-columns:1fr 84px;gap:14px;align-items:center;
+  background:var(--bache-2);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:12px;transition:border-color .15s, transform .1s;
+}
+.wcard:active{transform:scale(.99)}
+.wcard:hover{border-color:var(--ocre)}
+.wcard h3{font-family:var(--display);font-weight:400;font-size:22px;letter-spacing:.02em;margin-bottom:3px}
+.wcard .tag{font-size:13px;color:var(--craie-dim);margin-bottom:10px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.pill{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;padding:4px 8px;border:1px solid var(--line);border-radius:999px;color:var(--craie-dim)}
+.pill.dur{color:var(--balle);border-color:rgba(203,223,60,.4)}
+.pill.gear{color:var(--ocre-light);border-color:rgba(217,126,75,.45)}
+.wcard .mini{width:84px}
+
+/* ---------- detail ---------- */
+.backbar{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.btn-back{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--craie-dim);padding:6px 8px 6px 0}
+.btn-back:hover{color:var(--craie)}
+.detail-head{margin-bottom:20px}
+.detail-head .meta{margin-top:12px}
+.block{border:1px solid var(--line);border-radius:var(--radius);background:var(--bache-2);margin-bottom:10px;overflow:hidden}
+.block-head{width:100%;display:flex;align-items:center;gap:12px;padding:14px 16px;text-align:left}
+.block-num{font-family:var(--mono);font-size:11px;color:var(--ocre-light);letter-spacing:.05em;min-width:22px}
+.block-head h4{font-family:var(--display);font-weight:400;font-size:17px;letter-spacing:.03em;flex:1}
+.block-head .bdur{font-family:var(--mono);font-size:11px;color:var(--craie-dim)}
+.block-head .chev{color:var(--craie-dim);transition:transform .2s}
+.block.open .chev{transform:rotate(180deg)}
+.block-body{display:none;border-top:1px solid var(--line)}
+.block.open .block-body{display:block}
+.exrow{display:grid;grid-template-columns:58px 1fr;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(37,82,58,.5)}
+.exrow:last-child{border-bottom:none}
+.exrow .fig{width:58px;display:flex;align-items:flex-start}
+.exrow .nm{font-weight:600;font-size:14.5px}
+.exrow .vol{font-family:var(--mono);font-size:11.5px;color:var(--balle);margin:2px 0 4px}
+.exrow .ds{font-size:12.5px;color:var(--craie-dim);line-height:1.45}
+.note-clay{font-family:var(--mono);font-size:10.5px;color:var(--ocre-light);margin-top:4px;letter-spacing:.04em}
+
+/* ---------- buttons ---------- */
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;padding:15px 18px;font-size:14px}
+.btn-primary{background:var(--balle);color:var(--balle-ink)}
+.btn-primary:active{transform:scale(.985)}
+.btn-ghost{border:1.5px solid rgba(241,236,223,.3);color:var(--craie);font-weight:600}
+.btn-ghost:hover{border-color:var(--craie)}
+.sticky-cta{position:sticky;bottom:calc(86px + env(safe-area-inset-bottom));margin-top:16px;z-index:5}
+.sticky-cta .btn{width:100%;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+
+/* ---------- composer ---------- */
+.stack{border:1px dashed var(--line);border-radius:var(--radius);padding:14px;margin-bottom:18px;min-height:74px}
+.stack-empty{font-size:13.5px;color:var(--craie-dim);text-align:center;padding:12px 6px;line-height:1.5}
+.srow{display:flex;align-items:center;gap:10px;background:var(--bache-2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.srow:last-child{margin-bottom:0}
+.srow .n{font-family:var(--mono);font-size:10.5px;color:var(--ocre-light);min-width:18px}
+.srow .nm{flex:1;font-weight:600;font-size:14px}
+.srow .d{font-family:var(--mono);font-size:11px;color:var(--craie-dim)}
+.icon-btn{width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:8px;color:var(--craie-dim);font-size:14px}
+.icon-btn:hover{color:var(--craie);border-color:var(--craie-dim)}
+.icon-btn:disabled{opacity:.3;cursor:default}
+.stack-total{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-family:var(--mono);font-size:12px;color:var(--craie-dim)}
+.stack-total b{color:var(--balle);font-weight:700;font-size:14px}
+.brow{display:flex;align-items:center;gap:12px;background:var(--bache-2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.brow .nm{flex:1;font-weight:600;font-size:14px}
+.brow .sub{font-size:12px;color:var(--craie-dim);margin-top:2px}
+.brow .d{font-family:var(--mono);font-size:11px;color:var(--craie-dim)}
+.btn-add{width:36px;height:36px;border:1.5px solid var(--balle);color:var(--balle);border-radius:9px;font-size:20px;font-weight:600;display:flex;align-items:center;justify-content:center;flex:none}
+.btn-add:active{background:var(--balle);color:var(--balle-ink)}
+
+/* ---------- gear ---------- */
+.gcard{background:var(--bache-2);border:1px solid var(--line);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px}
+.gcard .nm{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.gcard .nm .opt{font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--craie-dim);border:1px solid var(--line);padding:2px 7px;border-radius:999px;text-transform:uppercase}
+.gcard .ds{font-size:13px;color:var(--craie-dim);margin-top:5px;line-height:1.5}
+.gcard .for{font-family:var(--mono);font-size:11px;color:var(--ocre-light);margin-top:7px}
+.gear-intro{font-size:14px;color:var(--craie-dim);line-height:1.55;margin-bottom:18px;border-left:3px solid var(--ocre);padding-left:12px}
+
+/* ---------- tabbar ---------- */
+#tabbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:20;
+  display:flex;justify-content:center;gap:4px;
+  background:rgba(12,35,24,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);
+  padding:8px 10px calc(8px + env(safe-area-inset-bottom));
+}
+.tab{flex:1;max-width:150px;display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 4px;border-radius:10px;color:var(--craie-dim)}
+.tab svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tab span{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+.tab.active{color:var(--balle)}
+
+/* ---------- live ---------- */
+#live{position:fixed;inset:0;z-index:50;background:var(--bache);display:flex;flex-direction:column;overflow:hidden}
+#live::before{content:"";position:absolute;inset:0;pointer-events:none;transition:background .4s;background:radial-gradient(110% 55% at 50% -6%, rgba(203,223,60,.06), transparent 65%)}
+#live.ph-work::before{background:radial-gradient(110% 55% at 50% -6%, rgba(192,95,46,.22), transparent 65%)}
+#live.ph-rest::before{background:radial-gradient(110% 55% at 50% -6%, rgba(127,176,138,.2), transparent 65%)}
+#live.ph-done::before{background:radial-gradient(110% 60% at 50% -6%, rgba(203,223,60,.16), transparent 65%)}
+.live-inner{position:relative;display:flex;flex-direction:column;height:100%;max-width:var(--maxw);margin:0 auto;width:100%;padding:calc(10px + env(safe-area-inset-top)) 18px calc(14px + env(safe-area-inset-bottom))}
+.live-top{display:flex;align-items:center;gap:10px}
+.live-top .ttl{flex:1;min-width:0}
+.live-top .wname{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--craie-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.live-top .bpos{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--balle)}
+.live-top .clock{font-family:var(--mono);font-size:15px;font-weight:700;font-variant-numeric:tabular-nums}
+.lbtn{width:38px;height:38px;flex:none;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:10px;color:var(--craie-dim)}
+.lbtn:hover{color:var(--craie)}
+.lbtn svg{width:17px;height:17px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.progress{height:4px;background:var(--bache-3);border-radius:2px;margin:12px 0 0;overflow:hidden}
+.progress i{display:block;height:100%;background:var(--balle);width:0%;transition:width .25s;border-radius:2px}
+
+#live-stage{flex:1;display:flex;flex-direction:column;min-height:0;padding-top:14px}
+.phase-tag{display:inline-flex;align-self:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;padding:5px 10px;border-radius:999px;margin-bottom:10px}
+.phase-tag.work{background:rgba(192,95,46,.18);color:var(--ocre-light);border:1px solid rgba(217,126,75,.5)}
+.phase-tag.rest{background:rgba(127,176,138,.14);color:var(--sauge);border:1px solid rgba(127,176,138,.45)}
+.phase-tag.intro{background:rgba(203,223,60,.1);color:var(--balle);border:1px solid rgba(203,223,60,.4)}
+.stage-title{font-family:var(--display);font-weight:400;font-size:clamp(24px,7vw,32px);letter-spacing:.02em;line-height:1.02}
+.stage-sub{font-family:var(--mono);font-size:12px;color:var(--craie-dim);margin-top:6px;letter-spacing:.05em}
+.stage-sub b{color:var(--craie);font-weight:700}
+
+.big{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+  font-size:clamp(72px,24vw,150px);line-height:1;text-align:center;margin:6px 0}
+#live.ph-rest .big{color:var(--sauge)}
+#live.paused .big{animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.35}}
+.big-reps{font-family:var(--mono);font-weight:700;font-size:clamp(64px,20vw,120px);line-height:1;text-align:center;margin:2px 0}
+.big-reps small{font-size:.38em;color:var(--craie-dim);font-weight:500}
+.unit{font-family:var(--mono);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--craie-dim);text-align:center;margin-bottom:6px}
+.sw{font-family:var(--mono);font-size:14px;color:var(--craie-dim);text-align:center;margin-bottom:8px}
+.sw b{color:var(--craie);font-variant-numeric:tabular-nums;font-weight:700}
+
+.court-wrap{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;margin:4px 0}
+.court-wrap svg{height:100%;max-height:34vh;width:auto;max-width:100%}
+.court-wrap.picto svg{max-height:20vh}
+.stage-desc{font-size:14px;line-height:1.5;color:var(--craie);text-align:center;max-width:44ch;margin:0 auto 4px}
+.stage-note{font-family:var(--mono);font-size:11px;color:var(--ocre-light);text-align:center;margin-top:4px;letter-spacing:.03em}
+.next-hint{font-family:var(--mono);font-size:11.5px;color:var(--craie-dim);text-align:center;margin-top:10px;letter-spacing:.03em}
+.next-hint b{color:var(--craie);font-weight:500}
+
+.stage-actions{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.stage-actions .btn{width:100%}
+.btn-count{background:var(--balle);color:var(--balle-ink);font-size:17px;padding:18px}
+.row-actions{display:flex;gap:10px}
+.row-actions .btn{flex:1;padding:12px;font-size:12.5px}
+
+.live-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.live-nav button{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--craie-dim);padding:10px 12px;border-radius:8px}
+.live-nav button:hover{color:var(--craie)}
+
+.intro-list{margin:16px 0 6px;flex:1;overflow:auto;min-height:0}
+.intro-item{display:flex;justify-content:space-between;gap:12px;padding:11px 2px;border-bottom:1px solid rgba(37,82,58,.55);font-size:14px}
+.intro-item:last-child{border-bottom:none}
+.intro-item .v{font-family:var(--mono);font-size:11.5px;color:var(--balle);white-space:nowrap}
+.intro-min{font-family:var(--mono);font-size:12px;color:var(--craie-dim);letter-spacing:.06em;margin-top:4px}
+
+.done-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px}
+.done-wrap h2{font-size:clamp(34px,10vw,48px)}
+.done-stats{font-family:var(--mono);font-size:13px;color:var(--craie-dim);line-height:2}
+.done-stats b{color:var(--balle);font-size:17px;font-weight:700}
+
+/* desktop */
+@media(min-width:640px){
+  body{display:block}
+  .court-wrap svg{max-height:38vh}
+}
+</style>
+</head>
+<body>
+<div id="app">
+<main id="main">
+
+  <!-- ============ ACCUEIL ============ -->
+  <section class="view" id="view-home">
+    <header class="hero">
+      <div class="eyebrow">Préparation physique · Tennis</div>
+      <h1>OCRE<span class="dot">.</span></h1>
+      <p class="hero-sub">Séances sans raquette, tracées sur les lignes du court.</p>
+      <div id="last-session"></div>
+    </header>
+    <div class="section-title">Séances <small id="wcount"></small></div>
+    <div id="workout-list"></div>
+  </section>
+
+  <!-- ============ DÉTAIL SÉANCE ============ -->
+  <section class="view hidden" id="view-detail">
+    <div class="backbar">
+      <button class="btn-back" id="btn-back">‹ &nbsp;Séances</button>
+    </div>
+    <div id="detail-content"></div>
+    <div class="sticky-cta"><button class="btn btn-primary" id="btn-start-detail">Démarrer la séance</button></div>
+  </section>
+
+  <!-- ============ COMPOSER ============ -->
+  <section class="view hidden" id="view-composer">
+    <header class="hero" style="margin-bottom:18px">
+      <div class="eyebrow">Séance libre</div>
+      <h2 style="font-size:32px;margin:6px 0 4px">Composer</h2>
+      <p class="hero-sub">Empile les blocs dans l'ordre, l'app enchaîne tout.</p>
+    </header>
+    <div class="section-title">Ta pile</div>
+    <div class="stack" id="stack"></div>
+    <div class="sticky-cta hidden" id="composer-cta"><button class="btn btn-primary" id="btn-start-stack">Démarrer la séance composée</button></div>
+    <div class="section-title">Blocs disponibles</div>
+    <div id="block-picker"></div>
+  </section>
+
+  <!-- ============ MATÉRIEL ============ -->
+  <section class="view hidden" id="view-gear">
+    <header class="hero" style="margin-bottom:18px">
+      <div class="eyebrow">Sac de sport</div>
+      <h2 style="font-size:32px;margin:6px 0 4px">Matériel</h2>
+    </header>
+    <p class="gear-intro">Les deux séances principales se font <b>sans aucun matériel</b> : le court, ses lignes et le grillage suffisent. Le reste ouvre des variantes.</p>
+    <div id="gear-list"></div>
+  </section>
+
+</main>
+
+<!-- ============ TABBAR ============ -->
+<nav id="tabbar">
+  <button class="tab active" data-tab="home">
+    <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="1.5"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="8" y1="7.5" x2="16" y2="7.5"/><line x1="8" y1="16.5" x2="16" y2="16.5"/></svg>
+    <span>Séances</span>
+  </button>
+  <button class="tab" data-tab="composer">
+    <svg viewBox="0 0 24 24"><rect x="5" y="14" width="14" height="5" rx="1"/><rect x="7" y="8" width="10" height="5" rx="1"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="10" y1="4" x2="14" y2="4"/></svg>
+    <span>Composer</span>
+  </button>
+  <button class="tab" data-tab="gear">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M6.5 6.5c3 1.5 3 9.5 0 11M17.5 6.5c-3 1.5-3 9.5 0 11"/></svg>
+    <span>Matériel</span>
+  </button>
+</nav>
+
+<!-- ============ LIVE ============ -->
+<div id="live" class="hidden">
+  <div class="live-inner">
+    <div class="live-top">
+      <button class="lbtn" id="btn-quit" aria-label="Quitter">
+        <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+      </button>
+      <div class="ttl">
+        <div class="wname" id="live-wname"></div>
+        <div class="bpos" id="live-bpos"></div>
+      </div>
+      <div class="clock" id="live-clock">00:00</div>
+      <button class="lbtn" id="btn-pause" aria-label="Pause">
+        <svg id="ic-pause" viewBox="0 0 24 24"><line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/></svg>
+        <svg id="ic-play" class="hidden" viewBox="0 0 24 24"><polygon points="7,4 20,12 7,20" fill="currentColor" stroke="none"/></svg>
+      </button>
+    </div>
+    <div class="progress"><i id="live-bar"></i></div>
+    <div id="live-stage"></div>
+    <div class="live-nav">
+      <button id="btn-prev">‹ Précédent</button>
+      <button id="btn-skip">Passer ›</button>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+"use strict";
+/* ================================================================
+   DONNÉES — exercices, blocs, séances
+   c: schéma sur le court · p: pictogramme · side: alterner les côtés
+   half: bip à mi-temps · count: compteur cumulatif · sw: chrono montant
+================================================================ */
+const EX = {
+  /* --- échauffement --- */
+  jog:{n:"Footing périmètre",c:"perimeter",d:"Allure souple autour du court, épaules relâchées. On monte le moteur en douceur."},
+  knees:{n:"Montées de genoux",c:"width",d:"Sur la largeur du court, aller-retour. Genoux à hauteur de hanche, fréquence avant amplitude."},
+  heels:{n:"Talons-fesses",c:"width",d:"Sur la largeur, aller-retour. Contact bref au sol, buste droit."},
+  shuffle_w:{n:"Pas chassés largeur",c:"width",d:"Aller face au filet, retour dos au filet. Appuis larges, bassin bas."},
+  lunge_rot:{n:"Fentes marchées + rotation",c:"width",d:"Rotation du buste au-dessus de la jambe avant. Genou dans l'axe du pied."},
+  deepsquat:{n:"Squat profond tenu",p:"squat",d:"Talons au sol, coudes qui écartent les genoux. Respire lentement, ouvre les hanches."},
+  ankle:{n:"Mobilité cheville au grillage",p:"ankle",d:"Pointe de pied à ~10 cm du grillage : le genou vient le toucher sans décoller le talon. Change de jambe à mi-temps.",half:1},
+  hips:{n:"Cercles de hanches",p:"hips",d:"Grands cercles contrôlés, mains sur les hanches, dans les deux sens."},
+  split_prog:{n:"Split step + départ 3 m",c:"sprint5",d:"Petit saut d'allègement puis départ dans une des 4 directions. Intensité progressive : 60 → 90 %.",count:1,unit:"départs"},
+
+  /* --- explosivité --- */
+  broad:{n:"Saut horizontal arrêté",c:"broad",d:"Pieds parallèles derrière la ligne de fond : bras engagés, réception stable tenue 2 s. Note ta distance.",count:1,unit:"sauts max",rec:"45 s de récup entre chaque saut"},
+  bounds:{n:"Bonds alternés",c:"bounds",d:"Le long du couloir (~24 m). Cherche la distance à chaque bond, genou moteur haut.",count:1,unit:"passages",rec:"retour en marchant = récup"},
+  lat_hops:{n:"Sauts latéraux ligne",c:"lateral",d:"Par-dessus la ligne de simple, pieds joints. Contacts au sol les plus brefs possible, regard devant."},
+  react5:{n:"Split step → sprint 5 m",c:"sprint5",d:"Split step puis explosion vers l'avant-droit, l'avant-gauche, l'arrière-droit ou l'arrière-gauche. Alterne les directions.",count:1,unit:"départs",rec:"retour en marchant entre chaque"},
+
+  /* --- agilité --- */
+  spider:{n:"L'araignée",c:"spider",d:"Départ au centre de la ligne de fond : toucher les 5 points dans l'ordre, en repassant par le centre entre chaque. Objectif : sous 18 s.",unit:"tour",sw:1},
+  corr:{n:"Pas chassés couloir ↔ couloir",c:"corridor",d:"Sur la ligne de fond, buste face au filet. Ne croise jamais les pieds, freine sur l'appui extérieur."},
+  fig8:{n:"Figure en 8",c:"figure8",d:"Dans le carré de service : shuffle vers l'avant, course arrière dans la diagonale. Reste gainé en marche arrière."},
+  slides:{n:"Glissades contrôlées",c:"slide",d:"Du centre vers le couloir : 2-3 appuis, glissade, appui final solide, retour en poussée.",side:1,unit:"glissades par côté",clay:1},
+
+  /* --- intermittent --- */
+  shuttle:{n:"Navette 4 lignes",c:"shuttle",d:"Fond → ligne de service → filet → ligne de service opposée → ligne de fond opposée, retour au fond entre chaque. Touche chaque ligne de la main.",unit:"parcours (~30 s)",sw:1},
+
+  /* --- gainage --- */
+  plank_taps:{n:"Planche + tap épaules",p:"plank",d:"Bassin verrouillé : viens toucher l'épaule opposée sans te déhancher."},
+  copen:{n:"Copenhague au sol",p:"copen",d:"Planche latérale, jambe du dessus posée au sol devant toi : soulève la jambe du dessous. Les adducteurs, assurance-vie du tennisman. Change de côté à mi-temps.",half:1},
+  twist:{n:"Rotations explosives du buste",p:"twist",d:"Assis, talons au sol, buste incliné : rotations rapides d'un côté à l'autre. Avec medecine ball contre le grillage si tu en as un."},
+  bridge:{n:"Pont fessier unilatéral",p:"bridge",d:"Une jambe tendue vers le ciel, pousse fort dans le talon au sol. ~12 par jambe, change à mi-temps.",half:1},
+  calf:{n:"Montées sur pointe unijambe",p:"calf",d:"Monte haut, redescends en 2-3 s. Le premier appui part du mollet. Change de jambe à mi-temps.",half:1},
+
+  /* --- retour au calme --- */
+  walk:{n:"Marche + respiration",c:"perimeter",d:"Inspire 4 s par le nez, expire 6 s par la bouche. Fais redescendre le cardio."},
+  st_h:{n:"Étirement ischios",p:"stretch",d:"Talon posé devant, jambe tendue, bascule le bassin vers l'avant. Change de jambe à mi-temps.",half:1},
+  st_p:{n:"Étirement psoas",p:"stretch",d:"Fente basse, genou au sol, pousse le bassin vers l'avant. Change de côté à mi-temps.",half:1},
+  st_c:{n:"Étirement mollets",p:"stretch",d:"Mains contre le grillage, jambe arrière tendue, talon au sol. Change de jambe à mi-temps.",half:1},
+  st_g:{n:"Étirement fessiers",p:"stretch",d:"Cheville posée sur le genou opposé, assis ou allongé. Change de côté à mi-temps.",half:1},
+
+  /* --- corde --- */
+  rope_b:{n:"Corde — classique",p:"rope",d:"Pieds joints, rebond bas, poignets souples, regard loin.",rope:1},
+  rope_a:{n:"Corde — pieds alternés",p:"rope",d:"Course sur place, monte légèrement les genoux, reste sur l'avant du pied.",rope:1},
+  rope_s:{n:"Corde — slalom latéral",p:"rope",d:"Pieds joints, déplace-toi de gauche à droite en sautant. Le pied du tennisman.",rope:1},
+
+  /* --- élastique --- */
+  band_er:{n:"Rotations externes",p:"band",d:"Coude collé au corps, plié à 90° : ouvre l'avant-bras vers l'extérieur, reviens lentement. Un bras puis l'autre.",side:1,band:1},
+  band_pull:{n:"Pull-apart",p:"band",d:"Bras tendus devant : écarte l'élastique jusqu'à la poitrine, omoplates serrées, reviens en freinant.",band:1},
+  band_row:{n:"Tirage vers le visage",p:"band",d:"Élastique accroché au grillage : tire vers le visage, coudes hauts, pouces vers l'arrière.",band:1},
+  band_walk:{n:"Marche latérale mini-band",p:"band",d:"Élastique au-dessus des genoux, demi-squat : pas latéraux sans laisser les genoux rentrer.",side:1,band:1,unit:"pas par direction"},
+
+  /* --- medecine ball --- */
+  mb_rot:{n:"Lancer en rotation",p:"twist",d:"De profil face au grillage : rotation explosive des hanches puis du buste, lâche le ballon. Le coup droit, sans raquette.",side:1,mb:1,unit:"lancers par côté"},
+  mb_slam:{n:"Slam",p:"slam",d:"Ballon au-dessus de la tête, projette-le au sol de toutes tes forces. Gainage explosif, jambes actives.",mb:1,unit:"slams"}
+};
+
+/* Un item : {ex, sets, work (s) OU reps, rest (s entre séries)} */
+const BLOCKS = {
+  wu_full:{name:"Échauffement complet",sub:"Cardio doux, gammes, mobilité, activation",min:15,items:[
+    {ex:"jog",work:300},
+    {ex:"knees",work:40,rest:15},
+    {ex:"heels",work:40,rest:15},
+    {ex:"shuffle_w",work:40,rest:15},
+    {ex:"lunge_rot",work:45,rest:15},
+    {ex:"deepsquat",work:30,rest:10},
+    {ex:"ankle",work:60,rest:10},
+    {ex:"hips",work:30,rest:10},
+    {ex:"split_prog",reps:6}
+  ]},
+  wu_exp:{name:"Échauffement express",sub:"Le minimum vital avant d'accélérer",min:8,items:[
+    {ex:"jog",work:180},
+    {ex:"knees",work:40,rest:10},
+    {ex:"shuffle_w",work:40,rest:10},
+    {ex:"lunge_rot",work:45,rest:10},
+    {ex:"split_prog",reps:4}
+  ]},
+  plyo:{name:"Explosivité",sub:"Pliométrie : qualité maximale, récup complète",min:18,items:[
+    {ex:"broad",reps:5},
+    {ex:"bounds",reps:4},
+    {ex:"lat_hops",sets:6,work:10,rest:50},
+    {ex:"react5",reps:8}
+  ]},
+  agility:{name:"Agilité & appuis",sub:"Déplacements spécifiques tennis",min:20,items:[
+    {ex:"spider",sets:5,reps:1,rest:70},
+    {ex:"corr",sets:4,work:20,rest:40},
+    {ex:"fig8",sets:4,work:30,rest:30},
+    {ex:"slides",sets:2,reps:6,rest:45}
+  ]},
+  interval:{name:"Intermittent navette",sub:"Le bloc qui pique",min:12,items:[
+    {ex:"shuttle",sets:6,reps:1,rest:60}
+  ]},
+  interval_s:{name:"Intermittent court",sub:"Version condensée",min:8,items:[
+    {ex:"shuttle",sets:4,reps:1,rest:60}
+  ]},
+  core:{name:"Gainage circuit",sub:"3 tours · 45 s d'effort / 15 s de transition",min:16,
+    circuit:{rounds:3,rest:15,roundRest:40},
+    items:[
+      {ex:"plank_taps",work:45},
+      {ex:"copen",work:40},
+      {ex:"twist",work:45},
+      {ex:"bridge",work:45},
+      {ex:"calf",work:45}
+  ]},
+  rope_bl:{name:"Corde à sauter",sub:"Coordination et pied léger",min:8,items:[
+    {ex:"rope_b",sets:2,work:45,rest:30},
+    {ex:"rope_a",sets:2,work:45,rest:30},
+    {ex:"rope_s",sets:2,work:45,rest:30}
+  ]},
+  band_bl:{name:"Épaules & prévention",sub:"La coiffe des rotateurs te dira merci",min:11,items:[
+    {ex:"band_er",sets:2,reps:15,rest:30},
+    {ex:"band_pull",sets:2,reps:15,rest:30},
+    {ex:"band_row",sets:2,reps:15,rest:30},
+    {ex:"band_walk",sets:2,reps:20,rest:30}
+  ]},
+  mb_bl:{name:"Puissance medecine ball",sub:"Transfert direct vers la frappe",min:11,items:[
+    {ex:"mb_rot",sets:3,reps:8,rest:60},
+    {ex:"mb_slam",sets:3,reps:10,rest:60}
+  ]},
+  cd:{name:"Retour au calme",sub:"On redescend, on s'étire",min:6,items:[
+    {ex:"walk",work:120},
+    {ex:"st_h",work:40,rest:5},
+    {ex:"st_p",work:40,rest:5},
+    {ex:"st_c",work:40,rest:5},
+    {ex:"st_g",work:40}
+  ]}
+};
+
+const WORKOUTS = [
+  {id:"full",name:"Explosivité complète",tag:"La grosse séance : vitesse, appuis, cardio, gainage.",icon:"spider",
+   blocks:["wu_full","plyo","agility","interval","core","cd"],focus:["Explosivité","Agilité","Cardio","Gainage"],gear:[]},
+  {id:"agi",name:"Jeu de jambes express",tag:"Appuis et déplacements, format condensé.",icon:"figure8",
+   blocks:["wu_exp","agility","interval_s","cd"],focus:["Agilité","Appuis","Cardio"],gear:[]},
+  {id:"cardio",name:"Cardio corde & navettes",tag:"Moteur aérobie et pied léger.",icon:"shuttle",
+   blocks:["wu_exp","rope_bl","interval","cd"],focus:["Cardio","Coordination"],gear:["Corde à sauter"]},
+  {id:"prev",name:"Prévention & gainage",tag:"Épaules, adducteurs, tronc. Idéal lendemain de match ou reprise.",icon:"picto:band",
+   blocks:["wu_exp","band_bl","core","cd"],focus:["Prévention","Gainage"],gear:["Élastique"]},
+  {id:"power",name:"Explosivité pure",tag:"Peu de volume, 100 % d'intention.",icon:"broad",
+   blocks:["wu_full","plyo","mb_bl","cd"],focus:["Explosivité","Puissance"],gear:["Medecine ball"]}
+];
+
+const GEAR = [
+  {n:"Chaussures terre battue",ds:"Semelle à chevrons : indispensable pour les glissades et les freinages du bloc agilité.",f:"Toutes les séances",opt:0},
+  {n:"Gourde 1,5 L + casquette",ds:"En plein été, cale la séance avant 11 h ou après 18 h. L'intermittent par 32 °C n'est plus du travail de qualité.",f:"Toutes les séances",opt:0},
+  {n:"Corde à sauter",ds:"Corde de vitesse ou lestée légère (~250 g). Réglage : les poignées arrivent sous les aisselles quand tu marches sur la corde.",f:"Cardio corde & navettes",opt:1},
+  {n:"Élastique + mini-band",ds:"Une bande longue à accrocher au grillage (rotations, tirages) et une mini-band pour les genoux.",f:"Prévention & gainage",opt:1},
+  {n:"Medecine ball 3–5 kg",ds:"À lancer contre le grillage ou au sol. Le meilleur transfert force → frappe sans raquette.",f:"Explosivité pure · variante du gainage",opt:1},
+  {n:"5 plots (ou bouteilles)",ds:"Pour matérialiser les 5 points de l'araignée. Facultatif : les intersections de lignes suffisent.",f:"Blocs agilité",opt:1}
+];
+
+/* ================================================================
+   SCHÉMAS — court en terre battue vu du ciel + pictogrammes
+================================================================ */
+const CH="#F7F2E4", OC="#BC5C2D", NET="#173424", BAL="#CBDF3C", DIM="#12301F";
+
+function _head(x,y,ang){
+  const r=9,a1=ang+2.62,a2=ang-2.62;
+  const f=v=>v.toFixed(1);
+  return `<line x1="${f(x)}" y1="${f(y)}" x2="${f(x+r*Math.cos(a1))}" y2="${f(y+r*Math.sin(a1))}"/>`+
+         `<line x1="${f(x)}" y1="${f(y)}" x2="${f(x+r*Math.cos(a2))}" y2="${f(y+r*Math.sin(a2))}"/>`;
+}
+function _ar(x1,y1,x2,y2,dash){
+  const ang=Math.atan2(y2-y1,x2-x1);
+  return `<g${dash?' stroke-dasharray="5 6"':''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/></g>`+_head(x2,y2,ang);
+}
+function _dbl(x1,y1,x2,y2){
+  const ang=Math.atan2(y2-y1,x2-x1);
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"/>`+_head(x2,y2,ang)+_head(x1,y1,ang+Math.PI);
+}
+function _dot(x,y){return `<circle cx="${x}" cy="${y}" r="5.5" fill="${BAL}" stroke="none"/>`}
+function _lbl(x,y,t){return `<circle cx="${x}" cy="${y}" r="8.5" fill="${DIM}" stroke="${CH}" stroke-width="1.4"/>`+
+  `<text x="${x}" y="${y+3.4}" fill="${CH}" font-size="10" font-family="Spline Sans Mono,monospace" text-anchor="middle" stroke="none">${t}</text>`}
+
+function courtSVG(kind){
+  let o="";
+  switch(kind){
+    case "perimeter":
+      o=`<rect x="10" y="10" width="220" height="454" rx="6" fill="none" stroke-dasharray="6 7" stroke-width="2.5"/>`
+       +_head(120,10,0)+_head(230,237,Math.PI/2)+_head(120,464,Math.PI)+_head(10,237,-Math.PI/2);
+      break;
+    case "width":
+      o=_ar(48,404,192,404)+_ar(192,432,48,432,1)+_dot(40,404);
+      break;
+    case "broad":
+      o=_dot(120,448)+`<g stroke-width="4">${_ar(120,442,120,352)}</g>`;
+      break;
+    case "bounds":
+      o=`<path d="M34,446 Q50,412 30,378 Q12,344 34,310 Q52,276 32,242 Q14,208 34,174 Q50,146 36,118" fill="none"/>`
+       +_head(36,118,-1.35)+_dot(34,446);
+      break;
+    case "lateral":
+      o=_dot(195,372)+_dbl(180,398,210,398)+_dbl(210,418,180,418)+_dbl(180,438,210,438);
+      break;
+    case "sprint5":
+      o=_dot(120,432)+_ar(114,424,62,376)+_ar(126,424,178,376)+_ar(114,440,78,468)+_ar(126,440,162,468);
+      break;
+    case "spider":
+      o=_dot(120,448)
+       +_ar(112,444,34,448)+_lbl(30,432,"1")
+       +_ar(112,440,52,360)+_lbl(42,344,"2")
+       +_ar(120,438,120,364)+_lbl(120,346,"3")
+       +_ar(128,440,188,360)+_lbl(198,344,"4")
+       +_ar(128,444,206,448)+_lbl(210,432,"5");
+      break;
+    case "corridor":
+      o=_dbl(28,446,212,446)+`<line x1="24" y1="436" x2="24" y2="456"/><line x1="216" y1="436" x2="216" y2="456"/>`;
+      break;
+    case "figure8":
+      o=`<path d="M82,301 C116,301 116,349 82,349 C48,349 48,301 82,301 C116,301 116,253 82,253 C48,253 48,301 82,301" fill="none"/>`
+       +_dot(82,349)+_head(110,330,-1.2);
+      break;
+    case "slide":
+      o=_dot(120,430)+_ar(112,430,58,430)
+       +`<line x1="62" y1="420" x2="52" y2="440"/><line x1="72" y1="420" x2="62" y2="440"/>`
+       +_ar(128,430,182,430,1)
+       +`<g stroke-dasharray="none"><line x1="178" y1="420" x2="188" y2="440"/><line x1="168" y1="420" x2="178" y2="440"/></g>`;
+      break;
+    case "shuttle":
+      o=_dbl(99,448,99,360)+_lbl(99,342,"1")
+       +_dbl(113,448,113,243)+_lbl(113,225,"2")
+       +_dbl(127,448,127,126)+_lbl(127,108,"3")
+       +_dbl(141,448,141,32)+_lbl(155,20,"4");
+      break;
+  }
+  return `<svg viewBox="0 0 240 474" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect x="4" y="4" width="232" height="466" rx="8" fill="${OC}"/>
+    <g stroke="${CH}" stroke-width="2" fill="none">
+      <rect x="20" y="20" width="200" height="434"/>
+      <line x1="45" y1="20" x2="45" y2="454"/><line x1="195" y1="20" x2="195" y2="454"/>
+      <line x1="45" y1="120" x2="195" y2="120"/><line x1="45" y1="354" x2="195" y2="354"/>
+      <line x1="120" y1="120" x2="120" y2="354"/>
+      <line x1="120" y1="454" x2="120" y2="446"/><line x1="120" y1="20" x2="120" y2="28"/>
+    </g>
+    <line x1="12" y1="237" x2="228" y2="237" stroke="${NET}" stroke-width="4"/>
+    <circle cx="12" cy="237" r="3" fill="${NET}"/><circle cx="228" cy="237" r="3" fill="${NET}"/>
+    <g stroke="${CH}" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".96">${o}</g>
+  </svg>`;
+}
+
+const PICTO = {
+  squat:`<line x1="14" y1="74" x2="106" y2="74"/><circle cx="52" cy="20" r="6.5"/><path d="M52,27 L46,46 L64,52 L60,72" fill="none"/><line x1="48" y1="34" x2="70" y2="30"/>`,
+  ankle:`<line x1="92" y1="12" x2="92" y2="74"/><line x1="92" y1="24" x2="100" y2="24"/><line x1="92" y1="42" x2="100" y2="42"/><line x1="92" y1="60" x2="100" y2="60"/><circle cx="40" cy="20" r="6.5"/><path d="M40,27 L46,48 L70,52 L74,72" fill="none"/><path d="M46,48 L32,72" fill="none"/>${_ar(72,44,86,44)}`,
+  hips:`<circle cx="60" cy="14" r="6.5"/><line x1="60" y1="21" x2="60" y2="46"/><path d="M60,30 L48,38 M60,30 L72,38" fill="none"/><path d="M60,46 L50,74 M60,46 L70,74" fill="none"/><ellipse cx="60" cy="44" rx="22" ry="8" fill="none" stroke-dasharray="5 5"/>`,
+  plank:`<line x1="12" y1="74" x2="108" y2="74"/><circle cx="24" cy="52" r="6"/><line x1="31" y1="58" x2="29" y2="74"/><path d="M32,56 L88,60 L100,74" fill="none"/>`,
+  copen:`<line x1="12" y1="74" x2="108" y2="74"/><line x1="28" y1="74" x2="28" y2="56"/><circle cx="24" cy="45" r="6"/><path d="M33,52 L92,42" fill="none"/><path d="M82,43 L107,69" fill="none"/><path d="M77,46 L103,50" fill="none"/>`,
+  twist:`<line x1="14" y1="70" x2="106" y2="70"/><path d="M56,64 L44,38" fill="none"/><circle cx="41" cy="30" r="6"/><path d="M56,64 L80,50 L90,54" fill="none"/><line x1="46" y1="44" x2="66" y2="46"/><circle cx="74" cy="46" r="7"/><path d="M30,26 Q56,8 82,22" fill="none" stroke-dasharray="5 5"/>${_head(82,22,0.5)}`,
+  bridge:`<line x1="12" y1="74" x2="108" y2="74"/><circle cx="22" cy="64" r="6"/><path d="M30,68 L58,46 L76,54 L72,74" fill="none"/><path d="M58,46 L88,18" fill="none"/>`,
+  calf:`<line x1="30" y1="76" x2="90" y2="76"/><circle cx="60" cy="14" r="6.5"/><line x1="60" y1="21" x2="60" y2="44"/><path d="M60,44 L62,62 L70,76" fill="none"/><path d="M60,44 L72,54 L68,66" fill="none"/>${_ar(84,62,84,38)}`,
+  stretch:`<line x1="14" y1="74" x2="106" y2="74"/><path d="M78,74 L98,70" fill="none"/><path d="M78,74 L58,50 L52,26" fill="none"/><circle cx="50" cy="18" r="6.5"/><path d="M58,50 L36,56 L34,74" fill="none"/><line x1="54" y1="34" x2="70" y2="30"/>`,
+  band:`<circle cx="44" cy="16" r="6.5"/><line x1="44" y1="23" x2="44" y2="52"/><path d="M44,52 L36,74 M44,52 L52,74" fill="none"/><path d="M44,30 L62,34 L76,22" fill="none"/><line x1="76" y1="22" x2="102" y2="40" stroke-dasharray="5 5"/><line x1="102" y1="32" x2="102" y2="50"/>`,
+  rope:`<line x1="20" y1="78" x2="100" y2="78"/><circle cx="60" cy="14" r="6.5"/><line x1="60" y1="21" x2="60" y2="44"/><path d="M60,44 L54,64 M60,44 L66,64" fill="none"/><path d="M60,28 L42,40 M60,28 L78,40" fill="none"/><path d="M42,40 Q60,88 78,40" fill="none" stroke-dasharray="5 5"/>`,
+  slam:`<circle cx="54" cy="22" r="6.5"/><line x1="54" y1="29" x2="54" y2="54"/><path d="M54,54 L46,76 M54,54 L62,76" fill="none"/><path d="M54,34 L66,12" fill="none"/><circle cx="72" cy="10" r="6.5"/>${_ar(86,22,86,62)}`
+};
+function pictoSVG(kind){
+  return `<svg viewBox="0 0 120 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <g stroke="${CH}" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round">${PICTO[kind]||""}</g>
+  </svg>`;
+}
+function exFigure(ex){
+  if(ex.c) return courtSVG(ex.c);
+  if(ex.p) return pictoSVG(ex.p);
+  return "";
+}
+
+/* ================================================================
+   MOTEUR
+================================================================ */
+const $=s=>document.querySelector(s);
+const store={
+  get(k,d){try{const v=localStorage.getItem("ocre_"+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem("ocre_"+k,JSON.stringify(v));}catch(e){}}
+};
+function fmt(s){s=Math.max(0,Math.round(s));const m=Math.floor(s/60);return m+":"+String(s%60).padStart(2,"0");}
+function fmtClock(s){s=Math.max(0,Math.floor(s));const h=Math.floor(s/3600);return h?h+":"+String(Math.floor(s%3600/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0"):fmt(s);}
+function fmtBig(s){return (S&&S.dur<60)?String(Math.max(0,Math.ceil(s))):fmt(Math.ceil(s));}
+function wMin(w){return w.blocks.reduce((a,b)=>a+BLOCKS[b].min,0);}
+
+function volLabel(it,b){
+  const ex=EX[it.ex];
+  if(b&&b.circuit) return b.circuit.rounds+" × "+it.work+" s";
+  const sets=it.sets||1;
+  if(it.work!=null){
+    if(sets>1) return sets+" × "+it.work+" s";
+    return it.work>=120? Math.round(it.work/60)+" min" : it.work+" s";
+  }
+  let u=ex.unit? ex.unit.split(" ")[0] : "reps";
+  if(ex.side) u+=" / côté";
+  return (sets>1? sets+" × ":"")+it.reps+" "+u;
+}
+function restLabel(it,b){
+  if(b&&b.circuit) return " · "+b.circuit.rest+" s de transition";
+  if(it.rest&&(it.sets||1)>1) return " · récup "+it.rest+" s";
+  return "";
+}
+
+/* ---------- timeline ---------- */
+function buildTimeline(w){
+  const tl=[];const nb=w.blocks.length;
+  w.blocks.forEach((bid,bi)=>{
+    const b=BLOCKS[bid];
+    tl.push({k:"intro",b:bid,bi,nb});
+    if(b.circuit){
+      const c=b.circuit;
+      for(let r=1;r<=c.rounds;r++){
+        b.items.forEach((it,ii)=>{
+          tl.push({k:"w",b:bid,bi,nb,ex:it.ex,work:it.work,round:r,rounds:c.rounds,ci:ii+1,cn:b.items.length});
+          const last=(r===c.rounds&&ii===b.items.length-1);
+          if(!last){
+            const endRound=(ii===b.items.length-1);
+            tl.push({k:"r",b:bid,bi,nb,dur:endRound?c.roundRest:c.rest,trans:endRound?0:1});
+          }
+        });
+      }
+    }else{
+      b.items.forEach((it,ii)=>{
+        const sets=it.sets||1;
+        for(let s=1;s<=sets;s++){
+          tl.push({k:"w",b:bid,bi,nb,ex:it.ex,work:it.work,reps:it.reps,set:s,sets});
+          const lastSet=(s===sets),lastItem=(ii===b.items.length-1);
+          if(!lastSet) tl.push({k:"r",b:bid,bi,nb,dur:it.rest||30});
+          else if(!lastItem) tl.push({k:"r",b:bid,bi,nb,dur:(sets===1&&it.rest!=null)?it.rest:18,trans:1});
+        }
+      });
+    }
+  });
+  tl.push({k:"done"});
+  return tl;
+}
+function findNextWork(i){
+  for(let j=i+1;j<S.tl.length;j++){
+    const st=S.tl[j];
+    if(st.k==="w"){
+      const ex=EX[st.ex];
+      let lab=ex.n;
+      if(st.sets>1) lab+=" · série "+st.set+"/"+st.sets;
+      if(st.rounds) lab+=" · tour "+st.round+"/"+st.rounds;
+      return lab;
+    }
+    if(st.k==="intro") return "bloc suivant — "+BLOCKS[st.b].name;
+    if(st.k==="done") return "fin de séance";
+  }
+  return "fin de séance";
+}
+
+/* ---------- audio & confort ---------- */
+let AC=null;
+function initAudio(){try{if(!AC)AC=new (window.AudioContext||window.webkitAudioContext)();if(AC&&AC.state==="suspended")AC.resume();}catch(e){}}
+function tone(f,d,g){try{if(!AC)return;const o=AC.createOscillator(),v=AC.createGain();o.type="square";o.frequency.value=f;const t=AC.currentTime;v.gain.setValueAtTime(g||0.13,t);v.gain.exponentialRampToValueAtTime(0.001,t+d);o.connect(v);v.connect(AC.destination);o.start(t);o.stop(t+d);}catch(e){}}
+function vib(p){try{if(navigator.vibrate)navigator.vibrate(p);}catch(e){}}
+function beepStart(){tone(880,.09);setTimeout(()=>tone(1175,.12),130);vib(60);}
+function beepRest(){tone(520,.16);}
+function fanfare(){tone(523,.12);setTimeout(()=>tone(659,.12),160);setTimeout(()=>tone(784,.26),320);vib([80,60,80]);}
+
+let WL=null;
+async function acquireWL(){try{if("wakeLock" in navigator){WL=await navigator.wakeLock.request("screen");}}catch(e){}}
+function releaseWL(){try{if(WL){WL.release();WL=null;}}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(S&&S.open&&document.visibilityState==="visible")acquireWL();});
+
+/* ---------- état live ---------- */
+let S=null;
+function startWorkout(w){
+  S={open:true,tl:buildTimeline(w),i:0,elapsed:0,running:true,finished:false,
+     wname:w.name,remain:null,dur:0,swT:0,count:0,lastW:null};
+  $("#live-wname").textContent=w.name;
+  $("#live").classList.remove("hidden");
+  document.body.style.overflow="hidden";
+  setPauseIcon();
+  initAudio();acquireWL();
+  setup();
+}
+function closeLive(){
+  if(!S)return;
+  S.open=false;S=null;
+  $("#live").classList.add("hidden");
+  document.body.style.overflow="";
+  releaseWL();
+  renderHome();
+}
+function cur(){return S?S.tl[S.i]:null;}
+function setup(){
+  const st=cur();if(!st)return;
+  S.swT=0;S.count=0;S.lastW=null;S.remain=null;S.dur=0;
+  if(st.k==="w"){
+    if(st.work!=null){S.remain=st.work;S.dur=st.work;}
+    beepStart();
+  }else if(st.k==="r"){
+    S.remain=st.dur;S.dur=st.dur;beepRest();
+  }else if(st.k==="done"){
+    finish();
+  }
+  renderStage();
+}
+function next(){if(!S)return;if(S.i<S.tl.length-1){S.i++;setup();}}
+function prev(){if(!S)return;if(S.i>0){S.i--;setup();}}
+function finish(){
+  if(S.finished)return;
+  S.finished=true;S.running=false;
+  const h=store.get("hist",[]);
+  h.push({d:Date.now(),name:S.wname,secs:S.elapsed});
+  while(h.length>30)h.shift();
+  store.set("hist",h);
+  releaseWL();fanfare();
+}
+
+/* ---------- tick ---------- */
+setInterval(()=>{
+  if(!S||!S.open||!S.running)return;
+  const st=cur();if(!st)return;
+  if(st.k==="done")return;
+  S.elapsed+=.25;
+  const ck=$("#live-clock");if(ck)ck.textContent=fmtClock(S.elapsed);
+  if(S.remain!=null){
+    S.remain-=.25;
+    const w=Math.ceil(S.remain);
+    if(w!==S.lastW){
+      S.lastW=w;
+      if(w===3||w===2||w===1)tone(660,.08);
+      if(st.k==="w"&&EX[st.ex]&&EX[st.ex].half&&st.work>=30&&w===Math.round(st.work/2)){
+        tone(760,.1);setTimeout(()=>tone(760,.1),150);vib(90);
+      }
+      const big=$("#big");if(big)big.textContent=fmtBig(S.remain);
+    }
+    if(S.remain<=0){tone(880,.32);vib(140);next();return;}
+  }
+  if(st.k==="w"&&st.work==null&&EX[st.ex]&&EX[st.ex].sw){
+    S.swT+=.25;
+    const sw=$("#sw");if(sw)sw.textContent=S.swT<60?S.swT.toFixed(1)+" s":fmt(S.swT);
+  }
+},250);
+
+/* ---------- rendu du live ---------- */
+function renderStage(){
+  const st=cur();if(!st)return;
+  const live=$("#live"),el=$("#live-stage");
+  live.classList.remove("ph-work","ph-rest","ph-done");
+  $("#live-bar").style.width=(S.i/(S.tl.length-1)*100)+"%";
+  $("#live-clock").textContent=fmtClock(S.elapsed);
+
+  if(st.k==="intro"){
+    const b=BLOCKS[st.b];
+    $("#live-bpos").textContent="Bloc "+(st.bi+1)+"/"+st.nb;
+    el.innerHTML=
+      '<span class="phase-tag intro">Bloc '+(st.bi+1)+' / '+st.nb+'</span>'+
+      '<div class="stage-title">'+b.name+'</div>'+
+      '<div class="intro-min">≈ '+b.min+' min · '+b.sub+'</div>'+
+      '<div class="intro-list">'+b.items.map(it=>'<div class="intro-item"><span>'+EX[it.ex].n+'</span><span class="v">'+volLabel(it,b)+'</span></div>').join("")+'</div>'+
+      '<div class="stage-actions"><button class="btn btn-primary" id="act-go">'+(st.bi===0?"C’est parti":"Go — bloc suivant")+'</button></div>';
+    $("#act-go").addEventListener("click",()=>{initAudio();next();});
+  }
+
+  else if(st.k==="w"){
+    live.classList.add("ph-work");
+    const ex=EX[st.ex];
+    const b=BLOCKS[st.b];
+    $("#live-bpos").textContent="Bloc "+(st.bi+1)+"/"+st.nb+" — "+b.name;
+    let serie="";
+    if(st.rounds)serie="Tour "+st.round+"/"+st.rounds+" · exercice "+st.ci+"/"+st.cn;
+    else if(st.sets>1)serie="Série "+st.set+"/"+st.sets;
+    let center="",actions="";
+    if(st.work!=null){
+      center='<div class="big" id="big">'+fmtBig(S.remain)+'</div>';
+    }else if(ex.count){
+      center='<div class="big-reps" id="cnt">0<small>/'+st.reps+'</small></div><div class="unit">'+(ex.unit||"répétitions")+'</div>';
+      actions='<div class="stage-actions"><button class="btn btn-count" id="act-count">+1</button></div>';
+    }else{
+      center='<div class="big-reps">'+st.reps+'</div><div class="unit">'+(ex.unit||(ex.side?"par côté":"répétitions"))+'</div>'+
+        (ex.sw?'<div class="sw">chrono — <b id="sw">0.0 s</b></div>':"");
+      actions='<div class="stage-actions"><button class="btn btn-primary" id="act-done">Série terminée</button></div>';
+    }
+    el.innerHTML=
+      '<span class="phase-tag work">Effort'+(serie?" · "+serie:"")+'</span>'+
+      '<div class="stage-title">'+ex.n+'</div>'+
+      center+
+      '<div class="court-wrap'+(ex.p?" picto":"")+'">'+exFigure(ex)+'</div>'+
+      '<div class="stage-desc">'+ex.d+'</div>'+
+      (ex.rec?'<div class="stage-note">Récup libre : '+ex.rec+'</div>':"")+
+      (ex.clay?'<div class="stage-note">Terre battue uniquement</div>':"")+
+      '<div class="next-hint">Ensuite — <b>'+findNextWork(S.i)+'</b></div>'+
+      actions;
+    const ac=$("#act-count");
+    if(ac)ac.addEventListener("click",()=>{
+      S.count++;tone(540,.06);
+      const c=$("#cnt");if(c)c.innerHTML=S.count+'<small>/'+st.reps+'</small>';
+      if(S.count>=st.reps){tone(880,.3);vib(120);const ref=S,idx=S.i;setTimeout(()=>{if(S===ref&&S.i===idx)next();},350);}
+    });
+    const ad=$("#act-done");
+    if(ad)ad.addEventListener("click",()=>{next();});
+  }
+
+  else if(st.k==="r"){
+    live.classList.add("ph-rest");
+    const b=BLOCKS[st.b];
+    $("#live-bpos").textContent="Bloc "+(st.bi+1)+"/"+st.nb+" — "+b.name;
+    el.innerHTML=
+      '<span class="phase-tag rest">'+(st.trans?"Transition":"Récupération")+'</span>'+
+      '<div class="big" id="big">'+fmtBig(S.remain)+'</div>'+
+      '<div class="next-hint" style="font-size:13px">Ensuite — <b>'+findNextWork(S.i)+'</b></div>'+
+      '<div class="court-wrap"></div>'+
+      '<div class="stage-actions"><div class="row-actions">'+
+        '<button class="btn btn-ghost" id="act-plus">+ 15 s</button>'+
+        '<button class="btn btn-ghost" id="act-skiprest">Passer</button>'+
+      '</div></div>';
+    $("#act-plus").addEventListener("click",()=>{S.remain+=15;const big=$("#big");if(big)big.textContent=fmtBig(S.remain);});
+    $("#act-skiprest").addEventListener("click",()=>{next();});
+  }
+
+  else if(st.k==="done"){
+    live.classList.add("ph-done");
+    $("#live-bpos").textContent="";
+    const nEx=S.tl.filter(x=>x.k==="w").length;
+    el.innerHTML=
+      '<div class="done-wrap">'+
+        '<div class="eyebrow balle">Séance terminée</div>'+
+        '<h2>Bien joué.</h2>'+
+        '<div class="done-stats"><b>'+fmtClock(S.elapsed)+'</b> de séance<br>'+nEx+' exercices · '+S.wname+'</div>'+
+        '<div class="stage-actions" style="width:100%;max-width:320px;margin-top:14px">'+
+          '<button class="btn btn-primary" id="act-home">Retour à l’accueil</button>'+
+        '</div>'+
+      '</div>';
+    $("#act-home").addEventListener("click",closeLive);
+  }
+}
+
+/* ================================================================
+   VUES
+================================================================ */
+let currentDetail=null;
+function iconSVG(icon){return icon.indexOf("picto:")===0?pictoSVG(icon.slice(6)):courtSVG(icon);}
+function switchView(v){
+  ["home","detail","composer","gear"].forEach(x=>{
+    $("#view-"+x).classList.toggle("hidden",x!==v);
+  });
+  const tab=(v==="detail")?"home":v;
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.tab===tab));
+  window.scrollTo(0,0);
+}
+function renderHome(){
+  $("#wcount").textContent=WORKOUTS.length+" programmes";
+  $("#workout-list").innerHTML=WORKOUTS.map(w=>
+    '<button class="wcard" data-w="'+w.id+'">'+
+      '<div>'+
+        '<h3>'+w.name+'</h3>'+
+        '<div class="tag">'+w.tag+'</div>'+
+        '<div class="meta">'+
+          '<span class="pill dur">≈ '+wMin(w)+' min</span>'+
+          w.focus.slice(0,2).map(f=>'<span class="pill">'+f+'</span>').join("")+
+          (w.gear.length?w.gear.map(g=>'<span class="pill gear">'+g+'</span>').join(""):'<span class="pill">Sans matériel</span>')+
+        '</div>'+
+      '</div>'+
+      '<div class="mini">'+iconSVG(w.icon)+'</div>'+
+    '</button>').join("");
+  document.querySelectorAll(".wcard").forEach(c=>c.addEventListener("click",()=>openDetail(c.dataset.w)));
+  const h=store.get("hist",[]);
+  const el=$("#last-session");
+  if(h.length){
+    const l=h[h.length-1],d=new Date(l.d);
+    el.innerHTML='<div class="last">Dernière séance — <b>'+l.name+'</b> · '+d.toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"short"})+' · '+Math.max(1,Math.round(l.secs/60))+' min</div>';
+  }else el.innerHTML="";
+}
+function blockHTML(bid,i){
+  const b=BLOCKS[bid];
+  return '<div class="block'+(i===0?" open":"")+'">'+
+    '<button class="block-head">'+
+      '<span class="block-num">'+String(i+1).padStart(2,"0")+'</span>'+
+      '<h4>'+b.name+'</h4>'+
+      '<span class="bdur">'+b.min+' min</span>'+
+      '<span class="chev">▾</span>'+
+    '</button>'+
+    '<div class="block-body">'+
+      b.items.map(it=>{
+        const ex=EX[it.ex];
+        return '<div class="exrow">'+
+          '<div class="fig">'+exFigure(ex)+'</div>'+
+          '<div>'+
+            '<div class="nm">'+ex.n+'</div>'+
+            '<div class="vol">'+volLabel(it,b)+restLabel(it,b)+'</div>'+
+            '<div class="ds">'+ex.d+'</div>'+
+            (ex.clay?'<div class="note-clay">Terre battue uniquement — sur dur : remplace par des freinages en deux appuis</div>':"")+
+          '</div>'+
+        '</div>';
+      }).join("")+
+    '</div>'+
+  '</div>';
+}
+function bindBlocks(scope){
+  document.querySelectorAll(scope+" .block-head").forEach(h=>{
+    h.addEventListener("click",()=>h.parentElement.classList.toggle("open"));
+  });
+}
+function openDetail(id){
+  const w=WORKOUTS.find(x=>x.id===id);if(!w)return;
+  currentDetail=w;
+  $("#detail-content").innerHTML=
+    '<div class="detail-head">'+
+      '<div class="eyebrow balle">Programme</div>'+
+      '<h2 style="font-size:34px;margin-top:4px">'+w.name+'</h2>'+
+      '<p class="hero-sub" style="margin-top:6px">'+w.tag+'</p>'+
+      '<div class="meta">'+
+        '<span class="pill dur">≈ '+wMin(w)+' min</span>'+
+        '<span class="pill">'+w.blocks.length+' blocs</span>'+
+        (w.gear.length?w.gear.map(g=>'<span class="pill gear">'+g+'</span>').join(""):'<span class="pill">Sans matériel</span>')+
+      '</div>'+
+    '</div>'+
+    w.blocks.map((bid,i)=>blockHTML(bid,i)).join("");
+  bindBlocks("#detail-content");
+  switchView("detail");
+}
+
+/* ---------- composer ---------- */
+let stack=store.get("stack",[]);
+if(!Array.isArray(stack)||stack.some(b=>!BLOCKS[b]))stack=[];
+function renderComposer(){
+  const el=$("#stack");
+  if(!stack.length){
+    el.innerHTML='<div class="stack-empty">Pile vide.<br>Ajoute des blocs ci-dessous avec le bouton +</div>';
+    $("#composer-cta").classList.add("hidden");
+  }else{
+    const total=stack.reduce((a,b)=>a+BLOCKS[b].min,0);
+    el.innerHTML=stack.map((bid,i)=>{
+      const b=BLOCKS[bid];
+      return '<div class="srow">'+
+        '<span class="n">'+String(i+1).padStart(2,"0")+'</span>'+
+        '<span class="nm">'+b.name+'</span>'+
+        '<span class="d">'+b.min+"’"+'</span>'+
+        '<button class="icon-btn" data-act="up" data-i="'+i+'" '+(i===0?"disabled":"")+' aria-label="Monter">↑</button>'+
+        '<button class="icon-btn" data-act="down" data-i="'+i+'" '+(i===stack.length-1?"disabled":"")+' aria-label="Descendre">↓</button>'+
+        '<button class="icon-btn" data-act="rm" data-i="'+i+'" aria-label="Retirer">✕</button>'+
+      '</div>';
+    }).join("")+
+    '<div class="stack-total"><span>'+stack.length+' bloc'+(stack.length>1?"s":"")+'</span><b>≈ '+total+' min</b></div>';
+    $("#composer-cta").classList.remove("hidden");
+    el.querySelectorAll(".icon-btn").forEach(btn=>btn.addEventListener("click",()=>{
+      const i=+btn.dataset.i,act=btn.dataset.act;
+      if(act==="rm")stack.splice(i,1);
+      if(act==="up"&&i>0){const t=stack[i-1];stack[i-1]=stack[i];stack[i]=t;}
+      if(act==="down"&&i<stack.length-1){const t=stack[i+1];stack[i+1]=stack[i];stack[i]=t;}
+      store.set("stack",stack);renderComposer();
+    }));
+  }
+  $("#block-picker").innerHTML=Object.keys(BLOCKS).map(bid=>{
+    const b=BLOCKS[bid];
+    return '<div class="brow">'+
+      '<div style="flex:1"><div class="nm">'+b.name+'</div><div class="sub">'+b.sub+'</div></div>'+
+      '<span class="d">'+b.min+"’"+'</span>'+
+      '<button class="btn-add" data-bid="'+bid+'" aria-label="Ajouter">+</button>'+
+    '</div>';
+  }).join("");
+  document.querySelectorAll(".btn-add").forEach(btn=>btn.addEventListener("click",()=>{
+    stack.push(btn.dataset.bid);store.set("stack",stack);renderComposer();
+  }));
+}
+
+/* ---------- matériel ---------- */
+function renderGear(){
+  $("#gear-list").innerHTML=GEAR.map(g=>
+    '<div class="gcard">'+
+      '<div class="nm">'+g.n+(g.opt?'<span class="opt">Optionnel</span>':"")+'</div>'+
+      '<div class="ds">'+g.ds+'</div>'+
+      '<div class="for">→ '+g.f+'</div>'+
+    '</div>').join("");
+}
+
+/* ---------- pause / nav live ---------- */
+function setPauseIcon(){
+  const paused=S&&!S.running;
+  $("#ic-pause").classList.toggle("hidden",!!paused);
+  $("#ic-play").classList.toggle("hidden",!paused);
+  $("#live").classList.toggle("paused",!!paused);
+}
+
+/* ================================================================
+   INIT
+================================================================ */
+renderHome();renderComposer();renderGear();
+document.querySelectorAll(".tab").forEach(t=>t.addEventListener("click",()=>switchView(t.dataset.tab)));
+$("#btn-back").addEventListener("click",()=>switchView("home"));
+$("#btn-start-detail").addEventListener("click",()=>{if(currentDetail)startWorkout(currentDetail);});
+$("#btn-start-stack").addEventListener("click",()=>{
+  if(stack.length)startWorkout({name:"Séance composée",blocks:stack.slice()});
+});
+$("#btn-quit").addEventListener("click",()=>{
+  const st=cur();
+  if(st&&st.k==="done"){closeLive();return;}
+  if(confirm("Quitter la séance en cours ?"))closeLive();
+});
+$("#btn-pause").addEventListener("click",()=>{
+  if(!S)return;
+  const st=cur();
+  if(st&&st.k==="done")return;
+  S.running=!S.running;setPauseIcon();
+});
+$("#btn-prev").addEventListener("click",prev);
+$("#btn-skip").addEventListener("click",()=>{
+  const st=cur();
+  if(st&&st.k!=="done")next();
+});
+</script>
+</body>
+</html>
